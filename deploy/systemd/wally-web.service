@@ -1,0 +1,19 @@
+[Unit]
+Description=Wally - webapp de teleoperación
+After=network.target mosquitto.service
+Wants=mosquitto.service
+
+[Service]
+Type=simple
+User=wally
+WorkingDirectory=/opt/wally
+ExecStart=/opt/wally/.venv/bin/python -m services.web
+Restart=always
+RestartSec=2
+
+# Deliberadamente sin prioridad elevada: si la Pi se satura, es preferible que
+# se degrade el vídeo antes que el lazo de control de wally-motion.
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

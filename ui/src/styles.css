@@ -1,0 +1,324 @@
+/* Interfaz de teleoperación de Wally.
+   Pensada para el móvil en horizontal: vídeo a pantalla completa y controles
+   superpuestos, para no robar espacio a lo único que importa mientras
+   conduces — ver por dónde va. */
+
+:root {
+  --bg: #0f1319;
+  --panel: rgba(17, 22, 30, 0.82);
+  --line: rgba(255, 255, 255, 0.1);
+  --text: #e8ecf2;
+  --muted: #8b97a8;
+  --ok: #3ddc91;
+  --warn: #ffb020;
+  --bad: #ff5c5c;
+  --accent: #ff8a3d;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 500 14px/1.4 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Nunca hacer scroll: un arrastre debe conducir, no mover la página. */
+  overflow: hidden;
+  overscroll-behavior: none;
+  user-select: none;
+}
+
+.app {
+  position: relative;
+  height: 100dvh;
+  width: 100%;
+}
+
+/* -- vídeo ---------------------------------------------------------- */
+
+.video,
+.video img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.video img {
+  object-fit: contain;
+  background: #05070a;
+}
+
+.video-fallback {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  height: 100%;
+  color: var(--muted);
+}
+
+.video-fallback p {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.video-fallback button {
+  margin-top: 8px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+}
+
+/* -- HUD ------------------------------------------------------------ */
+
+.hud {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hud > * {
+  pointer-events: auto;
+}
+
+.hud-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: max(10px, env(safe-area-inset-top)) 12px 10px;
+  background: linear-gradient(to bottom, rgba(6, 9, 13, 0.85), transparent);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+}
+
+.pill-sub {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+}
+
+.pill.is-ok {
+  color: var(--ok);
+  border-color: rgba(61, 220, 145, 0.35);
+}
+.pill.is-warn {
+  color: var(--warn);
+  border-color: rgba(255, 176, 32, 0.35);
+}
+.pill.is-bad {
+  color: var(--bad);
+  border-color: rgba(255, 92, 92, 0.4);
+}
+
+.sensors {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.sensor {
+  display: grid;
+  gap: 1px;
+  min-width: 62px;
+  padding: 4px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.sensor-name {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sensor-value {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Obstáculo a menos de 20 cm. */
+.sensor.is-close {
+  border-color: rgba(255, 92, 92, 0.5);
+  background: rgba(60, 18, 22, 0.8);
+}
+.sensor.is-close .sensor-value {
+  color: var(--bad);
+}
+
+/* -- barras de oruga ------------------------------------------------ */
+
+.hud-tracks {
+  left: 12px;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  display: grid;
+  gap: 6px;
+  width: min(240px, 40vw);
+}
+
+.track {
+  display: grid;
+  grid-template-columns: 12px 1fr 46px;
+  align-items: center;
+  gap: 8px;
+}
+
+.track-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.track-rail {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.track-zero {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.track-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--ok);
+  transition: width 80ms linear, left 80ms linear;
+}
+
+.track-fill.is-reverse {
+  background: var(--warn);
+}
+
+.track-value {
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* -- controles ------------------------------------------------------ */
+
+.hud-controls {
+  right: 12px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+
+.estop {
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 92, 92, 0.5);
+  background: rgba(60, 18, 22, 0.85);
+  color: var(--bad);
+  font: 700 13px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  backdrop-filter: blur(8px);
+}
+
+.estop.is-engaged {
+  background: var(--bad);
+  color: #2a0708;
+}
+
+.joystick {
+  position: relative;
+  width: min(168px, 36vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: radial-gradient(circle at 50% 45%, rgba(40, 50, 66, 0.9), rgba(14, 18, 25, 0.92));
+  backdrop-filter: blur(10px);
+  /* Sin esto, arrastrar hace scroll o zoom en lugar de conducir. */
+  touch-action: none;
+}
+
+.joystick.is-disabled {
+  opacity: 0.4;
+}
+
+.joystick-cross::before,
+.joystick-cross::after {
+  content: "";
+  position: absolute;
+  background: rgba(255, 255, 255, 0.07);
+}
+.joystick-cross::before {
+  left: 50%;
+  top: 12%;
+  bottom: 12%;
+  width: 1px;
+}
+.joystick-cross::after {
+  top: 50%;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+}
+
+.joystick-nub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 38%;
+  aspect-ratio: 1;
+  margin: -19% 0 0 -19%;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 6px 20px rgba(255, 138, 61, 0.35);
+  transition: transform 60ms ease-out;
+}
+
+.joystick.is-active .joystick-nub {
+  transition: none;
+  box-shadow: 0 0 0 6px rgba(255, 138, 61, 0.16);
+}
+
+/* En pantallas estrechas verticales, encoger para que quepa todo. */
+@media (max-height: 420px) {
+  .hud-tracks {
+    width: min(190px, 34vw);
+  }
+}

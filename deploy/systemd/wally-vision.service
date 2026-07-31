@@ -1,0 +1,20 @@
+[Unit]
+Description=Wally - captura de cámara
+After=network.target
+# No depende de wally-web: cada uno arranca y reinicia por su cuenta, y el
+# buffer de frames en /dev/shm sobrevive al reinicio de cualquiera de los dos.
+
+[Service]
+Type=simple
+User=wally
+WorkingDirectory=/opt/wally
+ExecStart=/opt/wally/.venv/bin/python -m services.vision
+Restart=always
+RestartSec=3
+
+# La inferencia de la Fase 5 vivirá aquí. Prioridad por debajo de motion, que
+# nunca debe quedarse sin CPU.
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

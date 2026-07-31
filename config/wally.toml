@@ -51,3 +51,21 @@ echo = 27
 name = "right"
 trig = 6
 echo = 22
+
+[vision]
+width = 640
+height = 480
+fps = 15.0
+jpeg_quality = 80
+# Ajustar según cómo quede fijada la cámara al chasis.
+hflip = false
+vflip = false
+
+[web]
+host = "0.0.0.0"
+port = 8080
+# El navegador manda el joystick a esta frecuencia. 20 Hz deja 10x de margen
+# frente al watchdog de 500 ms: un microcorte de wifi no frena el robot.
+control_hz = 20.0
+telemetry_hz = 5.0
+mjpeg_fps = 15.0

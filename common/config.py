@@ -76,6 +76,31 @@ class MotionConfig:
 
 
 @dataclass(frozen=True)
+class VisionConfig:
+    width: int = 640
+    height: int = 480
+    fps: float = 15.0
+    jpeg_quality: int = 80
+    # El montaje de la cámara puede quedar girado según cómo se fije al chasis.
+    hflip: bool = False
+    vflip: bool = False
+    frame_shm: str = "wally_frame"
+
+
+@dataclass(frozen=True)
+class WebConfig:
+    host: str = "0.0.0.0"
+    port: int = 8080
+    # Cadencia con la que el navegador envía el joystick. Debe dejar margen
+    # holgado frente a motion.watchdog_ms o el robot se frenará solo en cada
+    # microcorte de wifi.
+    control_hz: float = 20.0
+    # Frecuencia de refresco del panel de telemetría.
+    telemetry_hz: float = 5.0
+    mjpeg_fps: float = 15.0
+
+
+@dataclass(frozen=True)
 class MqttConfig:
     host: str = "localhost"
     port: int = 1883
@@ -86,6 +111,8 @@ class MqttConfig:
 class Config:
     mqtt: MqttConfig = field(default_factory=MqttConfig)
     motion: MotionConfig = field(default_factory=MotionConfig)
+    vision: VisionConfig = field(default_factory=VisionConfig)
+    web: WebConfig = field(default_factory=WebConfig)
     log_level: str = "INFO"
 
 
@@ -93,7 +120,12 @@ class Config:
 # explícitamente en lugar de inferirse: `from __future__ import annotations`
 # convierte las anotaciones en strings y la introspección de tipos no sirve.
 _NESTED: dict[type, dict[str, type]] = {
-    Config: {"mqtt": MqttConfig, "motion": MotionConfig},
+    Config: {
+        "mqtt": MqttConfig,
+        "motion": MotionConfig,
+        "vision": VisionConfig,
+        "web": WebConfig,
+    },
     MotionConfig: {"left": MotorPins, "right": MotorPins},
 }
 
