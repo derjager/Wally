@@ -1,0 +1,23 @@
+[project]
+name = "wally"
+version = "0.1.0"
+description = "Robot de orugas sobre Raspberry Pi 4"
+requires-python = ">=3.11"
+dependencies = [
+    "paho-mqtt>=2.0",
+]
+
+[project.optional-dependencies]
+# Solo instalable en la Raspberry Pi. En el equipo de desarrollo se trabaja con --sim.
+pi = ["pigpio>=1.78"]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["common", "services", "services.motion"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

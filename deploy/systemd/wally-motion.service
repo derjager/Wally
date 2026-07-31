@@ -1,0 +1,24 @@
+[Unit]
+Description=Wally - control de motores, servos y sensores de distancia
+After=network.target pigpiod.service mosquitto.service
+Wants=pigpiod.service mosquitto.service
+
+[Service]
+Type=simple
+User=wally
+WorkingDirectory=/opt/wally
+ExecStart=/opt/wally/.venv/bin/python -m services.motion
+Restart=always
+RestartSec=2
+
+# El control de motores tiene prioridad sobre visión y webapp: si la Pi se
+# satura, esto es lo último que debe perder tiempo de CPU.
+Nice=-10
+
+# Al parar el servicio, dar margen a que los motores queden a cero antes de
+# recurrir a SIGKILL.
+KillSignal=SIGTERM
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target

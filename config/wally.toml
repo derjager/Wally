@@ -1,0 +1,53 @@
+# Configuración de Wally.
+# Todos los valores son opcionales: lo que no se declare usa el default de
+# common/config.py. Los pines siguen la numeración BCM de PLAN.md §4.5.
+
+log_level = "INFO"
+
+[mqtt]
+host = "localhost"
+port = 1883
+
+[motion]
+standby = 25
+servo_left = 18
+servo_right = 23
+
+# Seguridad. No subir duty_cap sin releer PLAN.md §2: los motores FA-130 son
+# de 3V nominales y el riel de potencia entrega 4.8V.
+duty_cap = 0.60
+watchdog_ms = 500
+
+pwm_hz = 10000
+control_hz = 50
+ramp_up_per_s = 2.0
+ramp_down_per_s = 6.0
+
+[motion.left]
+pwm = 12
+in1 = 20
+in2 = 21
+invert = false
+
+[motion.right]
+pwm = 13
+in1 = 16
+in2 = 26
+invert = false
+
+# Si una oruga gira al revés, invertir aquí antes de recablear.
+
+[[motion.rangefinders]]
+name = "front"
+trig = 4
+echo = 17
+
+[[motion.rangefinders]]
+name = "left"
+trig = 5
+echo = 27
+
+[[motion.rangefinders]]
+name = "right"
+trig = 6
+echo = 22
