@@ -16,6 +16,7 @@ STATE_BATTERY = "wally/state/battery"
 # La cara lo usa para animar la boca mientras habla.
 STATE_SPEAKING = "wally/state/speaking"
 STATE_MOOD = "wally/state/mood"
+STATE_MODE = "wally/state/mode"
 
 # Visión
 VISION_DETECTIONS = "wally/vision/detections"

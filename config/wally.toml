@@ -78,6 +78,42 @@ track_label = "cat"
 appear_hits = 3
 disappear_misses = 12
 
+[brain]
+# ⚠️ ESTAS CONSTANTES SON ESTIMACIONES DE PARTIDA.
+# Dependen de cómo responda el chasis real: cuánto derrapan las orugas, cuánto
+# tarda en frenar, qué ángulo gira por segundo. Hay que afinarlas con el robot
+# montado, en el suelo definitivo y con la batería cargada.
+start_mode = "idle"
+update_hz = 10.0
+
+# Patrulla
+cruise_speed = 0.55
+turn_speed = 0.6
+backup_speed = 0.45
+stop_mm = 320.0        # a esta distancia deja de avanzar y gira
+backup_mm = 160.0      # tan cerca que girar rozaría: primero retrocede
+clear_mm = 500.0       # espacio necesario para dar el frente por despejado
+backup_s = 0.9
+turn_min_s = 0.5       # giro mínimo; sin esto vibra contra la pared
+turn_timeout_s = 3.5   # girando más de esto, se asume encerrado
+
+# Seguir a la gata. Despacio a propósito: el ultrasonido no detecta pelaje,
+# así que el robot no puede "verla" con los sensores de distancia.
+follow_speed = 0.35
+follow_turn_speed = 0.42
+follow_stop_area = 0.18   # fracción del encuadre a partir de la cual para
+follow_align_tol = 0.35
+follow_steer_gain = 0.5
+cat_patience_s = 6.0
+patrol_when_no_cat = true
+follow_cat_while_patrolling = true
+
+# Un comando de conducción ajeno silencia a brain este tiempo: mueves el
+# joystick y el robot obedece sin cambiar de modo a mano.
+manual_override_s = 3.0
+announce_cat = true
+cat_greeting = "¡Hola, gatita!"
+
 [face]
 # Lienzo del pixel art. Se escala por el mayor factor entero que quepa en la
 # pantalla: con 480x320 sale x3. Subirlo pierde el aspecto de píxel gordo.

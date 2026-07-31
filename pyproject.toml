@@ -28,6 +28,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = [
+    "services.brain",
     "common",
     "services",
     "services.motion",

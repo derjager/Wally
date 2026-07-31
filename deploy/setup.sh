@@ -81,13 +81,14 @@ fi
 echo "==> Servicios systemd"
 cp "$INSTALL_DIR"/deploy/systemd/*.service /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable wally-motion wally-vision wally-web wally-net wally-face wally-voice
+systemctl enable wally-motion wally-vision wally-web wally-net wally-face wally-voice wally-brain
 
 cat <<'EOF'
 
 Instalación completa.
 
-  Arrancar:   sudo systemctl start wally-motion wally-vision wally-web wally-net wally-face wally-voice
+  Arrancar:   sudo systemctl start wally-motion wally-vision wally-web wally-net \
+                       wally-face wally-voice wally-brain
   Ver logs:   journalctl -u wally-motion -f
   Espiar bus: mosquitto_sub -t 'wally/#' -v
   Webapp:     http://wally.local:8080

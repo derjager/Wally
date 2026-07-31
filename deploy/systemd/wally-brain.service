@@ -1,0 +1,20 @@
+[Unit]
+Description=Wally - comportamiento autónomo
+After=network.target mosquitto.service wally-motion.service
+Wants=mosquitto.service
+
+[Service]
+Type=simple
+User=wally
+WorkingDirectory=/opt/wally
+ExecStart=/opt/wally/.venv/bin/python -m services.brain
+Restart=always
+RestartSec=3
+
+# Sin prioridad elevada: si brain se retrasa o muere, deja de publicar y el
+# watchdog de wally-motion frena el robot. Degradar así es el comportamiento
+# correcto, no algo que haya que evitar dándole CPU preferente.
+Nice=3
+
+[Install]
+WantedBy=multi-user.target

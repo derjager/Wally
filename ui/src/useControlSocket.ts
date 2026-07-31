@@ -48,6 +48,11 @@ export function useControlSocket() {
     [sendRaw],
   );
 
+  const setMode = useCallback(
+    (mode: string) => sendRaw({ type: "mode", mode }),
+    [sendRaw],
+  );
+
   useEffect(() => {
     let timer: number | undefined;
     let ticker: number | undefined;
@@ -91,5 +96,5 @@ export function useControlSocket() {
     };
   }, []);
 
-  return { state, rttMs, setInput, estop, setArm };
+  return { state, rttMs, setInput, estop, setArm, setMode };
 }

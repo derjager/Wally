@@ -46,6 +46,7 @@ class RobotState:
         self.networks: list[dict[str, Any]] = []
         self.detections: list[dict[str, Any]] = []
         self.cat: dict[str, Any] = {}
+        self.mode = "idle"
         self.updated = 0.0
 
     def snapshot(self) -> dict[str, Any]:
@@ -54,6 +55,7 @@ class RobotState:
             "sensors": self.sensors,
             "detections": self.detections,
             "cat": self.cat,
+            "mode": self.mode,
             "age_s": round(time.monotonic() - self.updated, 2) if self.updated else None,
         }
 
@@ -91,12 +93,16 @@ def create_app(cfg: Config, bus: Bus | None = None) -> FastAPI:
         def on_cat(payload: dict[str, Any]) -> None:
             state.cat = payload
 
+        def on_mode(payload: dict[str, Any]) -> None:
+            state.mode = str(payload.get("mode", "idle"))
+
         bus.subscribe(topics.STATE_MOTION, on_motion)
         bus.subscribe(topics.STATE_SENSORS, on_sensors)
         bus.subscribe(topics.NET_STATUS, on_net)
         bus.subscribe(topics.NET_NETWORKS, on_networks)
         bus.subscribe(topics.VISION_DETECTIONS, on_detections)
         bus.subscribe(topics.VISION_CAT, on_cat)
+        bus.subscribe(topics.STATE_MODE, on_mode)
 
     # -- control ---------------------------------------------------------
 
@@ -120,6 +126,13 @@ def create_app(cfg: Config, bus: Bus | None = None) -> FastAPI:
                     if bus is not None:
                         bus.publish(topics.CMD_ESTOP, {"engaged": bool(msg.get("engaged", True))})
                     log.warning("parada de emergencia desde %s: %s", peer, msg.get("engaged"))
+                    continue
+
+                if msg.get("type") == "mode":
+                    mode = str(msg.get("mode", ""))
+                    if bus is not None and mode:
+                        bus.publish(topics.CMD_MODE, {"mode": mode})
+                    log.info("modo solicitado desde %s: %s", peer, mode)
                     continue
 
                 if msg.get("type") == "servo":

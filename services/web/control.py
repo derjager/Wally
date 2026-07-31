@@ -17,13 +17,19 @@ from services.motion.motors import clamp, mix_arcade
 log = logging.getLogger("web.control")
 
 
+# Marca de origen. `wally-brain` la usa para distinguir sus propios comandos
+# de los de un humano: al ver uno ajeno, se aparta unos segundos para que el
+# joystick tenga prioridad sin necesidad de cambiar de modo a mano.
+SOURCE = "web"
+
+
 @dataclass(frozen=True)
 class DriveCommand:
     left: float
     right: float
 
-    def as_payload(self) -> dict[str, float]:
-        return {"left": round(self.left, 4), "right": round(self.right, 4)}
+    def as_payload(self) -> dict[str, float | str]:
+        return {"left": round(self.left, 4), "right": round(self.right, 4), "src": SOURCE}
 
 
 def parse_joystick(msg: dict) -> DriveCommand | None:

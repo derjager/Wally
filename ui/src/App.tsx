@@ -10,6 +10,13 @@ const SENSOR_LABELS: Record<string, string> = {
   right: "Der",
 };
 
+const MODES: { id: string; label: string }[] = [
+  { id: "teleop", label: "Manual" },
+  { id: "patrol", label: "Patrulla" },
+  { id: "follow_cat", label: "Seguir gata" },
+  { id: "idle", label: "Parado" },
+];
+
 function formatDistance(mm: number | null | undefined) {
   if (mm === null || mm === undefined) return "—";
   if (mm >= 1000) return `${(mm / 1000).toFixed(2)} m`;
@@ -38,7 +45,7 @@ function TrackBar({ label, value }: { label: string; value: number }) {
 }
 
 export default function App() {
-  const { state, rttMs, setInput, estop } = useControlSocket();
+  const { state, rttMs, setInput, estop, setMode } = useControlSocket();
   const telemetry = useTelemetry();
   const [videoOk, setVideoOk] = useState(true);
   const [estopOn, setEstopOn] = useState(false);
@@ -138,9 +145,27 @@ export default function App() {
         )}
       </div>
 
+      <div className="hud hud-modes">
+        {MODES.map((m) => (
+          <button
+            key={m.id}
+            className={`mode ${telemetry.mode === m.id ? "is-active" : ""}`}
+            onClick={() => setMode(m.id)}
+            disabled={!connected}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+
       <div className="hud hud-tracks">
         <TrackBar label="I" value={motion.left ?? 0} />
         <TrackBar label="D" value={motion.right ?? 0} />
+        {telemetry.mode !== "teleop" && telemetry.mode !== "idle" && (
+          <p className="autonomy-hint">
+            Autónomo · mueve el joystick para tomar el control
+          </p>
+        )}
       </div>
 
       <div className="hud hud-controls">

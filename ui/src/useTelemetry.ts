@@ -17,6 +17,7 @@ export interface Telemetry {
   sensors: Record<string, number | null>;
   detections: DetectionInfo[];
   cat: { present?: boolean; score?: number | null; offset_x?: number | null };
+  mode: string;
   age_s: number | null;
 }
 
@@ -25,6 +26,7 @@ const EMPTY: Telemetry = {
   sensors: {},
   detections: [],
   cat: {},
+  mode: "idle",
   age_s: null,
 };
 

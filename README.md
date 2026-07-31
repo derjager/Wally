@@ -15,9 +15,9 @@ Robot de orugas sobre Raspberry Pi 4: visión, cara expresiva, voz y control web
 | 3 · Hotspot y red | Código listo, probado extremo a extremo |
 | 4 · Cara y voz | Código listo, probado extremo a extremo |
 | 5 · Visión (detección) | Código listo, probado extremo a extremo |
-| 6 · Autonomía | — |
+| 6 · Autonomía | Código listo. **Las constantes de navegación hay que afinarlas con el robot montado** |
 
-134 pruebas, todas ejecutables sin hardware.
+168 pruebas, todas ejecutables sin hardware.
 
 ---
 
@@ -49,7 +49,7 @@ sudo apt install mosquitto                                # Linux
 ### A2. Comprobar que todo está bien
 
 ```bash
-.venv/bin/python -m pytest        # deben pasar 134
+.venv/bin/python -m pytest        # deben pasar 168
 ```
 
 ### A3. Conducir en simulación
@@ -61,6 +61,7 @@ Cuatro terminales, desde la raíz del proyecto:
 .venv/bin/python -m services.motion --sim     # motores simulados
 .venv/bin/python -m services.net --sim        # red simulada
 .venv/bin/python -m services.web              # servidor web
+.venv/bin/python -m services.brain            # comportamiento autónomo
 ```
 
 Abre **http://localhost:8080**. Verás vídeo sintético y podrás conducir con el
@@ -276,6 +277,23 @@ Con las orugas al aire, mueve el joystick. Comprueba:
 
 Solo cuando las tres cosas funcionen, ponlo en el suelo.
 
+### D4. Afinar la autonomía
+
+Con el robot ya en el suelo y a mano para cogerlo, activa **Patrulla** desde la
+webapp. Lo que hay que observar y ajustar en `[brain]` de `config/wally.toml`:
+
+| Si ves esto… | Ajusta |
+|---|---|
+| Frena demasiado tarde y toca la pared | Sube `stop_mm` |
+| Frena tan lejos que no pasa por puertas | Baja `stop_mm` |
+| Vibra o titubea delante de un obstáculo | Sube `turn_min_s` |
+| Sale del giro y vuelve a bloquearse enseguida | Sube `clear_mm` |
+| Se queda atascado en rincones | Sube `backup_s` o baja `turn_timeout_s` |
+| Va demasiado rápido para reaccionar | Baja `cruise_speed` |
+
+**Ten a mano el botón de parada de la webapp** mientras ajustas. Y la primera
+vez, prueba en una habitación despejada, no entre las patas de las sillas.
+
 ---
 
 # Referencia
@@ -292,8 +310,39 @@ wally-web      FastAPI: webapp, WebSocket, streaming MJPEG
 wally-net      Hotspot y configuración de red (único que corre como root)
 wally-face     Cara pixel art en la pantalla
 wally-voice    TTS con Piper
-wally-brain    Máquina de estados de comportamiento   · Fase 6
+wally-brain    Comportamiento autónomo: patrulla y seguimiento
 ```
+
+### Autonomía
+
+Cuatro modos, seleccionables desde la webapp: **Manual**, **Patrulla**,
+**Seguir gata** y **Parado**.
+
+**No hace falta cambiar de modo para tomar el control.** Brain y la webapp
+escriben en el mismo `wally/cmd/drive`, así que los comandos llevan una marca
+`src`: al ver uno ajeno, brain se aparta 3 segundos. Mueves el joystick y el
+robot te obedece al instante; lo sueltas y retoma lo que estaba haciendo.
+
+La patrulla tiene tres fases —avanzar, retroceder, girar— con **tiempos
+mínimos**. Esa es la parte que de verdad importa: sin ellos, el robot que ve
+un obstáculo gira un instante, deja de verlo, avanza, lo vuelve a ver, y se
+queda vibrando contra la pared en lugar de rodearla. Por lo mismo, `clear_mm`
+(500) es mayor que `stop_mm` (320): si fueran iguales, saldría del giro justo
+en el límite y se bloquearía de nuevo al instante.
+
+Persiguiendo a la gata va **más despacio** que patrullando y frena por el
+tamaño de su caja en la imagen, nunca por los sensores de distancia — el
+ultrasonido no detecta pelaje, así que fiarse de él para no atropellarla sería
+justo el error que no se puede cometer.
+
+Si brain se retrasa o muere, deja de publicar y el watchdog de `wally-motion`
+frena el robot. Degradar así es el comportamiento correcto, y por eso el
+servicio no corre con prioridad elevada.
+
+> ⚠️ **Las constantes de `[brain]` en `config/wally.toml` son estimaciones de
+> partida.** Dependen de cuánto derrapan las orugas, cuánto tarda en frenar y
+> qué ángulo gira por segundo. Hay que afinarlas con el robot montado, en el
+> suelo definitivo y con la batería cargada.
 
 ### Cara
 
@@ -431,6 +480,11 @@ mosquitto_pub -t wally/cmd/net/hotspot -m '{}'
 
 # Ver lo que detecta
 mosquitto_sub -t 'wally/vision/#' -v
+
+# Modo autónomo
+mosquitto_pub -t wally/cmd/mode -m '{"mode":"patrol"}'
+mosquitto_pub -t wally/cmd/mode -m '{"mode":"follow_cat"}'
+mosquitto_pub -t wally/cmd/mode -m '{"mode":"idle"}'
 ```
 
 ### Actualizar el código
@@ -470,3 +524,6 @@ sudo systemctl restart wally-motion wally-vision wally-web wally-net
 | El vídeo va a tirones al detectar | Baja `inference_fps` en `config/wally.toml` |
 | No reconoce a la gata | Con poca luz el modelo falla. Baja `min_score` o enciende los LEDs IR |
 | Detecta la gata donde no está | Sube `min_score`, o `appear_hits` para exigir más evidencia |
+| En autónomo no se mueve | ¿Llega `wally/state/sensors`? Sin sensores brain avanza, pero revisa `systemctl status wally-brain` |
+| El joystick no le gana al modo autónomo | La webapp debe marcar `src`. Comprueba con `mosquitto_sub -t wally/cmd/drive -v` |
+| Choca contra sofás o cortinas | Esperable: el ultrasonido no rebota en superficies blandas. Es el límite del sensor, no un fallo |

@@ -4,7 +4,8 @@ Contexto del proyecto para retomar el trabajo sin reconstruirlo desde cero.
 Registra lo que **no** se deduce leyendo el código: por qué las cosas son como
 son, qué se descartó y qué falta.
 
-**Actualizar al cerrar cada fase.** Última actualización: 2026-07-31, fin de la Fase 5.
+**Actualizar al cerrar cada fase.** Última actualización: 2026-07-31, fin de la
+Fase 6. **Las seis fases de software están escritas; falta todo el hardware.**
 
 ---
 
@@ -70,6 +71,7 @@ fusible 10 A, condensadores, resistencias para los divisores.
 | Detección de la gata | Clase `cat` de COCO, sin entrenar | **No hay otros gatos**; no hace falta identificación individual |
 | Inferencia | **Hilo aparte**, a 5 fps frente a 15 de captura | Detectar cuesta ~100 ms; en el mismo bucle el vídeo iría a trompicones |
 | Overlay | Dibujado **en el servidor**, antes de comprimir | El frame ya se codificaba; sale gratis y vale para `/snapshot.jpg` |
+| Arbitraje manual/autónomo | Marca `src` en `cmd/drive` + cesión de 3 s | Mover el joystick basta para tomar el control; no hay que cambiar de modo a mano |
 | Alcance | Solo LAN | Sin acceso remoto. Sin autenticación en la webapp |
 | Voz | Solo hablar | No hay micrófono. Nada de reconocimiento de voz por ahora |
 
@@ -99,6 +101,10 @@ No debilitar ninguno sin una razón muy buena. Cada uno tiene pruebas.
 9. **Los servicios opcionales degradan, no fallan.** Sin Piper el robot se
    queda mudo; sin modelo TFLite, ciego de reconocimiento. Ninguno de los dos
    impide arrancar: un robot teleoperable sigue siendo útil.
+10. **Perseguir a la gata frena por tamaño de la caja en la imagen**, jamás por
+    los sensores de distancia, y va más despacio que patrullando.
+11. **Si `wally-brain` muere, deja de publicar y el watchdog frena.** Por eso
+    corre sin prioridad elevada: degradar así es lo correcto.
 
 ## 5. Bugs encontrados y por qué el código es así
 
@@ -155,6 +161,19 @@ posiciones fijas es la causa habitual de que un modelo nuevo devuelva cajas
 donde se esperaban puntuaciones. Se detectan por su forma, y clases y
 puntuaciones se distinguen porque estas últimas siempre están en [0, 1].
 
+**Girar junto a una pared podía acabar raspando.**
+La fase de giro solo se interrumpía por `turn_timeout_s` (3.5 s). Si al girar
+una esquina se acercaba por debajo de `backup_mm`, el robot seguía girando y
+rozando durante segundos. Ahora la fase TURN comprueba también la distancia
+mínima y pasa a retroceder. Lo encontró la prueba extremo a extremo, no las
+unitarias: hacía falta la secuencia obstáculo → giro → acercarse.
+
+**En simulación, `wally-motion` publica `state/sensors` con valores
+aleatorios.** Al montar escenarios de prueba para brain, esas lecturas pisan
+las inyectadas a mano y el comportamiento parece errático. En el robot real
+solo hay una fuente de sensores, así que no es un problema; pero es el primer
+sitio donde mirar si una prueba de navegación sale no determinista.
+
 ## 6. Estado por fases
 
 | Fase | Estado |
@@ -165,9 +184,14 @@ puntuaciones se distinguen porque estas últimas siempre están en [0, 1].
 | 3 · `wally-net` | ✅ Probado extremo a extremo con mosquitto real |
 | 4 · `wally-face` + `wally-voice` | ✅ Probado extremo a extremo. Cara verificada visualmente |
 | 5 · Visión (detección) | ✅ Probado extremo a extremo. Overlay verificado visualmente |
-| 6 · `wally-brain` (autonomía) | ⬜ Última. **Necesita sensores reales para validarse** |
+| 6 · `wally-brain` (autonomía) | ✅ Probado extremo a extremo. **Constantes sin afinar** |
 
-134 pruebas, todas sin hardware. Nada se ha probado aún sobre la Pi.
+168 pruebas, todas sin hardware.
+
+**El software está completo; el robot no existe todavía.** Nada se ha ejecutado
+nunca sobre la Pi: ni un motor ha girado, ni la cámara ha capturado un frame
+real, ni la cara se ha visto en la pantalla. Todo lo verificado ha sido con
+backends simulados.
 
 ### Verificado extremo a extremo
 
@@ -188,6 +212,10 @@ puntuaciones se distinguen porque estas últimas siempre están en [0, 1].
   gata, y `offset_x` publicado para que la Fase 6 pueda girar hacia ella.
 - Overlay renderizado a JPEG y revisado a ojo: caja naranja para la gata, azul
   para el resto, etiquetas legibles.
+- Navegación autónoma contra broker real: avanza con el camino libre, gira
+  hacia el lado más despejado ante un obstáculo, retrocede si está muy pegado,
+  calla mientras alguien usa el joystick, retoma al soltarlo, y gira hacia la
+  gata saludándola una sola vez.
 
 ## 7. Convenciones del proyecto
 
@@ -209,32 +237,41 @@ services/
   net/        nmcli, máquina de estados de red
   face/       expressions (geometría) · render (pygame) · state (reglas)
   voice/      tts (backends) · queue (prioridad y anti-repetición)
+  brain/      behaviors (lógica pura) · service (modos y arbitraje)
 ui/           React + Vite (compilar antes de desplegar)
 config/       wally.toml
 models/       coco_labels.txt versionado; el .tflite se descarga
 assets/       voices/ (modelos Piper, no versionados)
 deploy/       setup.sh, install_voice.sh, install_model.sh + units systemd
 tools/        drive_test.py
-tests/        134 pruebas
+tests/        168 pruebas
 ```
 
-En `face/`, la separación importa: `state.py` no importa pygame, así que las
-reglas de ánimo y los temporizadores se prueban sin abrir ninguna pantalla.
+La separación se repite en los tres servicios con lógica interesante:
+`face/state.py` no importa pygame y `brain/behaviors.py` no importa MQTT, así
+que las reglas y los temporizadores se prueban sin abrir una pantalla ni
+levantar un broker.
 
 ## 9. Al retomar
 
 1. Leer este archivo y el estado de fases.
-2. `.venv/bin/python -m pytest` — deben pasar 134.
-3. Si llegó el hardware, la prioridad es **Fase 0** (validar energía) y luego
-   validar la Fase 1 con motores reales, con el robot suspendido.
-4. Queda la **Fase 6** (`wally-brain`: patrulla, evitar obstáculos, seguir a la
-   gata). Se puede escribir en simulación, pero **ajustarla de verdad exige el
-   robot montado**: las constantes de giro y distancia de frenado dependen de
-   cómo responda el chasis real.
+2. `.venv/bin/python -m pytest` — deben pasar 168.
 
-Las piezas que la Fase 6 necesita ya están publicadas: `wally/state/sensors`
-(distancias), `wally/vision/cat` (con `offset_x` en -1..1 para saber hacia qué
-lado girar) y `wally/cmd/drive`, que respeta el watchdog si se refresca.
+**No queda software pendiente por escribir. Lo que queda es el robot.** En este
+orden:
+
+1. **Fase 0 — energía.** Ajustar el XL4015 a 4.8 V desconectado de todo,
+   verificar que el BEC es switching y da ≥3 A, cablear con los divisores en
+   los ECHO, y comprobar `vcgencmd get_throttled` a `0x0` con motores al
+   máximo. Sin esto, nada de lo demás importa.
+2. **Validar la Fase 1** con el robot suspendido: sentido de giro de cada
+   oruga, watchdog al cerrar la pestaña, botón de parada.
+3. **Afinar `[brain]`** con el robot en el suelo. La tabla de ajustes está en
+   la sección D4 del README.
+4. Verificar los pendientes de hardware de la sección 2 de este archivo.
+
+Al desplegar: compilar la UI en el portátil (`cd ui && npm run build`) antes de
+sincronizar, para que la Pi no necesite npm.
 
 Preferencia del usuario: planificar mediante preguntas concretas antes de
 escribir código.

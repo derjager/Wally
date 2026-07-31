@@ -151,6 +151,62 @@ class VoiceConfig:
 
 
 @dataclass(frozen=True)
+class BrainConfig:
+    """Comportamiento autónomo.
+
+    ⚠️ Estas constantes son **estimaciones de partida**. Dependen de cómo
+    responda el chasis real: cuánto derrapan las orugas, cuánto tarda en
+    frenar, qué ángulo gira por segundo. Hay que afinarlas con el robot
+    montado, en el suelo definitivo y con la batería cargada.
+    """
+
+    start_mode: str = "idle"
+    update_hz: float = 10.0
+
+    # --- Patrulla ---
+    cruise_speed: float = 0.55
+    turn_speed: float = 0.6
+    backup_speed: float = 0.45
+    # Distancia a la que se deja de avanzar y se gira.
+    stop_mm: float = 320.0
+    # Tan cerca que girar rozaría: primero hay que retroceder.
+    backup_mm: float = 160.0
+    # Hay que ver al menos esto de espacio para dar el frente por despejado.
+    # Mayor que stop_mm a propósito: si fueran iguales, el robot saldría del
+    # giro justo en el límite y volvería a bloquearse de inmediato.
+    clear_mm: float = 500.0
+    backup_s: float = 0.9
+    # Giro mínimo antes de reevaluar. Sin esto el robot vibra contra la pared
+    # en vez de rodearla.
+    turn_min_s: float = 0.5
+    # Girando más de esto sin despejar, se asume encerrado y retrocede.
+    turn_timeout_s: float = 3.5
+
+    # --- Seguir a la gata ---
+    # Despacio a propósito: el ultrasonido no detecta pelaje, así que el robot
+    # no puede "ver" a la gata con los sensores de distancia.
+    follow_speed: float = 0.35
+    follow_turn_speed: float = 0.42
+    # Fracción del encuadre a partir de la cual se considera que ya está
+    # bastante cerca y hay que parar.
+    follow_stop_area: float = 0.18
+    # Desvío tolerable antes de girar sobre el sitio.
+    follow_align_tol: float = 0.35
+    follow_steer_gain: float = 0.5
+    # Cuánto espera quieto tras perderla de vista.
+    cat_patience_s: float = 6.0
+    patrol_when_no_cat: bool = True
+    follow_cat_while_patrolling: bool = True
+
+    # --- Interacción ---
+    # Un comando de conducción ajeno silencia a brain este tiempo. Mueves el
+    # joystick y el robot obedece sin tener que cambiar de modo a mano.
+    manual_override_s: float = 3.0
+    announce_cat: bool = True
+    cat_greeting: str = "¡Hola, gatita!"
+
+
+@dataclass(frozen=True)
 class NetConfig:
     iface: str = "wlan0"
     ap_ssid: str = "Wally-Setup"
@@ -183,6 +239,7 @@ class Config:
     net: NetConfig = field(default_factory=NetConfig)
     face: FaceConfig = field(default_factory=FaceConfig)
     voice: VoiceConfig = field(default_factory=VoiceConfig)
+    brain: BrainConfig = field(default_factory=BrainConfig)
     log_level: str = "INFO"
 
 
@@ -198,6 +255,7 @@ _NESTED: dict[type, dict[str, type]] = {
         "net": NetConfig,
         "face": FaceConfig,
         "voice": VoiceConfig,
+        "brain": BrainConfig,
     },
     MotionConfig: {"left": MotorPins, "right": MotorPins},
 }
