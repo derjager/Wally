@@ -365,7 +365,7 @@ Pygame escribe directo al framebuffer con SDL, sin escritorio corriendo. Ahorra 
 | **1** | `wally-motion` | ✅ **Código escrito y probado en simulación.** Pendiente de validar con hardware | Fase 0 |
 | **2** | `wally-web` + teleoperación | ✅ **Código escrito y probado extremo a extremo.** Joystick y vídeo en el navegador | Fase 1 |
 | **3** | `wally-net` | ✅ **Código escrito y probado extremo a extremo** con broker real. Hotspot y configuración de wifi desde la webapp | Fase 2 |
-| **4** | `wally-face` + `wally-voice` | Personalidad: cara pixel art y voz en español | — |
+| **4** | `wally-face` + `wally-voice` | ✅ **Código escrito y probado extremo a extremo.** Cara pixel art con 8 ánimos y voz en español | — |
 | **5** | `wally-vision` | Detección de objetos y de la gata | — |
 | **6** | `wally-brain` | Movimiento autónomo, patrulla, seguimiento de la gata | Fases 1, 5, sensores |
 

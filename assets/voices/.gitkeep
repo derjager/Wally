@@ -1,0 +1,2 @@
+Los modelos de Piper (.onnx) se descargan con deploy/install_voice.sh.
+No se versionan: pesan ~60 MB cada uno.

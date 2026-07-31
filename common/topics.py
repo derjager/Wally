@@ -4,14 +4,18 @@
 CMD_DRIVE = "wally/cmd/drive"  # {"left": -1..1, "right": -1..1}
 CMD_SERVO = "wally/cmd/servo"  # {"arm_left": 0..180, "arm_right": 0..180}
 CMD_ESTOP = "wally/cmd/estop"  # {"engaged": bool}
-CMD_SAY = "wally/cmd/say"
-CMD_MOOD = "wally/cmd/mood"
+CMD_SAY = "wally/cmd/say"  # {"text": "...", "priority": "normal|urgent"}
+CMD_MOOD = "wally/cmd/mood"  # {"mood": "...", "hold_s": 3.0}
 CMD_MODE = "wally/cmd/mode"
+CMD_LOOK = "wally/cmd/look"  # {"x": -1..1, "y": -1..1} hacia dónde mira
 
 # Estado publicado
 STATE_MOTION = "wally/state/motion"
 STATE_SENSORS = "wally/state/sensors"
 STATE_BATTERY = "wally/state/battery"
+# La cara lo usa para animar la boca mientras habla.
+STATE_SPEAKING = "wally/state/speaking"
+STATE_MOOD = "wally/state/mood"
 
 # Visión
 VISION_DETECTIONS = "wally/vision/detections"

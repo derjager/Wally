@@ -61,6 +61,26 @@ jpeg_quality = 80
 hflip = false
 vflip = false
 
+[face]
+# Lienzo del pixel art. Se escala por el mayor factor entero que quepa en la
+# pantalla: con 480x320 sale x3. Subirlo pierde el aspecto de píxel gordo.
+logical_width = 160
+logical_height = 106
+fps = 30
+window_scale = 3
+blink_every_s = 4.0
+blink_jitter_s = 2.5
+# Sin actividad durante este tiempo, la cara se adormece.
+sleepy_after_s = 90.0
+
+[voice]
+model = "assets/voices/es_ES-davefx-medium.onnx"
+piper_bin = "piper"
+player = "aplay"
+# Evita que repita el mismo aviso mientras se acerca a una pared.
+dedupe_window_s = 8.0
+max_queue = 12
+
 [net]
 iface = "wlan0"
 ap_ssid = "Wally-Setup"

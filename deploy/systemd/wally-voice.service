@@ -1,0 +1,20 @@
+[Unit]
+Description=Wally - voz (Piper TTS)
+After=network.target mosquitto.service sound.target
+
+[Service]
+Type=simple
+User=wally
+WorkingDirectory=/opt/wally
+ExecStart=/opt/wally/.venv/bin/python -m services.voice
+Restart=always
+RestartSec=3
+
+SupplementaryGroups=audio
+
+# Si Piper o el modelo de voz faltan, el servicio arranca igualmente y se
+# limita a registrar lo que habría dicho. Un robot mudo sigue siendo útil.
+Nice=8
+
+[Install]
+WantedBy=multi-user.target

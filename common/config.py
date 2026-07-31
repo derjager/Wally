@@ -101,6 +101,36 @@ class WebConfig:
 
 
 @dataclass(frozen=True)
+class FaceConfig:
+    # Resolución lógica del pixel art. Se escala por el mayor factor entero
+    # que quepa en la pantalla: así los píxeles salen cuadrados y nítidos en
+    # lugar de emborronados por un escalado fraccionario.
+    logical_width: int = 160
+    logical_height: int = 106
+    fps: int = 30
+    # La 3.5" HDMI es 480x320; en desarrollo se abre una ventana escalada.
+    window_scale: int = 3
+    # Cada cuánto parpadea, con algo de azar para que no parezca un metrónomo.
+    blink_every_s: float = 4.0
+    blink_jitter_s: float = 2.5
+    # Sin actividad durante este tiempo, la cara se adormece.
+    sleepy_after_s: float = 90.0
+
+
+@dataclass(frozen=True)
+class VoiceConfig:
+    # Modelo Piper (.onnx). Instalar en assets/voices/.
+    model: str = "assets/voices/es_ES-davefx-medium.onnx"
+    piper_bin: str = "piper"
+    # Reproductor de audio. En Bookworm, aplay viene con alsa-utils.
+    player: str = "aplay"
+    # Descarta frases repetidas dentro de esta ventana: evita que el robot
+    # repita "obstáculo" veinte veces seguidas acercándose a una pared.
+    dedupe_window_s: float = 8.0
+    max_queue: int = 12
+
+
+@dataclass(frozen=True)
 class NetConfig:
     iface: str = "wlan0"
     ap_ssid: str = "Wally-Setup"
@@ -131,6 +161,8 @@ class Config:
     vision: VisionConfig = field(default_factory=VisionConfig)
     web: WebConfig = field(default_factory=WebConfig)
     net: NetConfig = field(default_factory=NetConfig)
+    face: FaceConfig = field(default_factory=FaceConfig)
+    voice: VoiceConfig = field(default_factory=VoiceConfig)
     log_level: str = "INFO"
 
 
@@ -144,6 +176,8 @@ _NESTED: dict[type, dict[str, type]] = {
         "vision": VisionConfig,
         "web": WebConfig,
         "net": NetConfig,
+        "face": FaceConfig,
+        "voice": VoiceConfig,
     },
     MotionConfig: {"left": MotorPins, "right": MotorPins},
 }

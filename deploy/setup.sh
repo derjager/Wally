@@ -19,7 +19,7 @@ fi
 echo "==> Paquetes del sistema"
 apt-get update -qq
 apt-get install -y -qq python3-venv python3-dev pigpio mosquitto mosquitto-clients \
-    avahi-daemon rsync
+    avahi-daemon rsync alsa-utils libsdl2-2.0-0 libsdl2-ttf-2.0-0
 # picamera2 se instala por apt, no por pip: depende de libcamera compilado
 # contra el sistema y pip no puede construirlo.
 apt-get install -y -qq python3-picamera2 --no-install-recommends
@@ -32,8 +32,9 @@ echo "==> Usuario de servicio"
 if ! id -u "$SERVICE_USER" >/dev/null 2>&1; then
     useradd --system --create-home --shell /usr/sbin/nologin "$SERVICE_USER"
 fi
-# gpio: acceso a los pines. video: acceso a la cámara, para las fases siguientes.
-usermod -aG gpio,video,audio "$SERVICE_USER"
+# gpio: pines. video/render: cámara y framebuffer (la cara dibuja por KMSDRM
+# sin escritorio). audio: salida de voz.
+usermod -aG gpio,video,render,audio,input "$SERVICE_USER"
 
 echo "==> Código en $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
@@ -80,16 +81,20 @@ fi
 echo "==> Servicios systemd"
 cp "$INSTALL_DIR"/deploy/systemd/*.service /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable wally-motion wally-vision wally-web wally-net
+systemctl enable wally-motion wally-vision wally-web wally-net wally-face wally-voice
 
 cat <<'EOF'
 
 Instalación completa.
 
-  Arrancar:   sudo systemctl start wally-motion wally-vision wally-web wally-net
+  Arrancar:   sudo systemctl start wally-motion wally-vision wally-web wally-net wally-face wally-voice
   Ver logs:   journalctl -u wally-motion -f
   Espiar bus: mosquitto_sub -t 'wally/#' -v
   Webapp:     http://wally.local:8080
+
+VOZ (opcional, ~70 MB)
+  Wally arranca mudo hasta que instales Piper y una voz:
+     bash deploy/install_voice.sh
 
 PRIMERA PUESTA EN MARCHA
   Si no hay wifi configurada, Wally levanta la red 'Wally-Setup'

@@ -1,0 +1,22 @@
+[Unit]
+Description=Wally - cara en la pantalla
+After=network.target mosquitto.service
+
+[Service]
+Type=simple
+User=wally
+WorkingDirectory=/opt/wally
+ExecStart=/opt/wally/.venv/bin/python -m services.face
+Restart=always
+RestartSec=3
+
+# SDL dibuja directo al framebuffer por KMSDRM, sin escritorio: ahorra ~300 MB
+# de RAM y la CPU que necesita la visión. Requiere pertenecer a los grupos
+# video y render para poder abrir /dev/dri.
+Environment=SDL_VIDEODRIVER=kmsdrm
+SupplementaryGroups=video render input
+
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

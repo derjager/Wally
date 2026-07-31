@@ -9,4 +9,5 @@ ui/dist/
 ui/tsconfig.tsbuildinfo
 models/*.tflite
 assets/voices/*.onnx
+assets/voices/*.onnx.json
 config/wally.local.toml
