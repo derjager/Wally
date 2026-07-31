@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -157,3 +159,59 @@ def test_la_telemetria_refleja_lo_que_llega_por_mqtt(client_and_bus):
     body = client.get("/api/state").json()
     assert body["motion"]["left"] == 0.4
     assert body["sensors"]["front"] == 320.0
+
+
+# -- red -------------------------------------------------------------------
+
+
+def test_estado_de_red_llega_desde_wally_net(client_and_bus):
+    client, bus = client_and_bus
+    from common import topics
+
+    bus.subscriptions[topics.NET_STATUS](
+        {"mode": "hotspot", "ssid": None, "ip": "192.168.4.1", "online": False}
+    )
+    bus.subscriptions[topics.NET_NETWORKS](
+        {"networks": [{"ssid": "CasaDeClaudio", "signal": 80, "security": "WPA2"}]}
+    )
+
+    assert client.get("/api/net/status").json()["mode"] == "hotspot"
+    nets = client.get("/api/net/networks").json()["networks"]
+    assert nets[0]["ssid"] == "CasaDeClaudio"
+
+
+def test_conectar_publica_el_comando(client_and_bus):
+    client, bus = client_and_bus
+    r = client.post("/api/net/connect", json={"ssid": "MiRed", "password": "secreta"})
+
+    assert r.json()["pending"] is True
+    cmds = [p for t, p in bus.published if t.endswith("cmd/net/connect")]
+    assert cmds == [{"ssid": "MiRed", "password": "secreta"}]
+
+
+def test_conectar_sin_ssid_se_rechaza(client_and_bus):
+    client, bus = client_and_bus
+    r = client.post("/api/net/connect", json={"password": "x"})
+
+    assert r.json()["ok"] is False
+    assert [p for t, p in bus.published if t.endswith("cmd/net/connect")] == []
+
+
+def test_scan_y_hotspot_publican_comandos(client_and_bus):
+    client, bus = client_and_bus
+    client.post("/api/net/scan")
+    client.post("/api/net/hotspot")
+
+    temas = [t for t, _ in bus.published]
+    assert any(t.endswith("cmd/net/scan") for t in temas)
+    assert any(t.endswith("cmd/net/hotspot") for t in temas)
+
+
+def test_la_webapp_nunca_ejecuta_nmcli(client_and_bus):
+    """wally-web está expuesto a la red y corre sin privilegios: solo publica
+    mensajes. Quien toca NetworkManager es wally-net, como root."""
+    import services.web.app as webapp
+
+    fuente = Path(webapp.__file__).read_text()
+    assert "nmcli" not in fuente
+    assert "subprocess" not in fuente

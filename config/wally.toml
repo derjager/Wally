@@ -61,6 +61,18 @@ jpeg_quality = 80
 hflip = false
 vflip = false
 
+[net]
+iface = "wlan0"
+ap_ssid = "Wally-Setup"
+# WPA2 exige 8 caracteres como mínimo. Cámbiala: con un AP abierto, la
+# contraseña de tu wifi viajaría en claro durante la configuración.
+ap_password = "wally1234"
+boot_timeout_s = 30.0
+# Tiempo sin red antes de volver al modo configuración. Generoso a propósito:
+# un router reiniciándose no debe dejarte sin control. 0 lo desactiva.
+fallback_after_s = 120.0
+poll_s = 5.0
+
 [web]
 host = "0.0.0.0"
 port = 8080

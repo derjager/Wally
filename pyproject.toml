@@ -21,7 +21,14 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["common", "services", "services.motion", "services.vision", "services.web"]
+packages = [
+    "common",
+    "services",
+    "services.motion",
+    "services.vision",
+    "services.web",
+    "services.net",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

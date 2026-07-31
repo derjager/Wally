@@ -17,6 +17,15 @@ STATE_BATTERY = "wally/state/battery"
 VISION_DETECTIONS = "wally/vision/detections"
 VISION_CAT = "wally/vision/cat"
 
+# Red. El estado va retenido para que la webapp lo tenga nada más suscribirse,
+# sin esperar al siguiente ciclo.
+NET_STATUS = "wally/net/status"
+NET_NETWORKS = "wally/net/networks"
+CMD_NET_SCAN = "wally/cmd/net/scan"
+CMD_NET_CONNECT = "wally/cmd/net/connect"
+CMD_NET_HOTSPOT = "wally/cmd/net/hotspot"
+CMD_NET_FORGET = "wally/cmd/net/forget"
+
 # Disponibilidad (Last Will and Testament)
 SYS_ONLINE = "wally/sys/online/{service}"
 

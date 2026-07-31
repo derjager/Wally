@@ -42,6 +42,8 @@ class RobotState:
     def __init__(self) -> None:
         self.motion: dict[str, Any] = {}
         self.sensors: dict[str, Any] = {}
+        self.net: dict[str, Any] = {}
+        self.networks: list[dict[str, Any]] = []
         self.updated = 0.0
 
     def snapshot(self) -> dict[str, Any]:
@@ -72,8 +74,16 @@ def create_app(cfg: Config, bus: Bus | None = None) -> FastAPI:
             state.sensors = payload
             state.updated = time.monotonic()
 
+        def on_net(payload: dict[str, Any]) -> None:
+            state.net = payload
+
+        def on_networks(payload: dict[str, Any]) -> None:
+            state.networks = payload.get("networks", [])
+
         bus.subscribe(topics.STATE_MOTION, on_motion)
         bus.subscribe(topics.STATE_SENSORS, on_sensors)
+        bus.subscribe(topics.NET_STATUS, on_net)
+        bus.subscribe(topics.NET_NETWORKS, on_networks)
 
     # -- control ---------------------------------------------------------
 
@@ -183,6 +193,53 @@ def create_app(cfg: Config, bus: Bus | None = None) -> FastAPI:
     @app.get("/api/state")
     async def api_state() -> dict[str, Any]:
         return state.snapshot()
+
+    # -- red -------------------------------------------------------------
+    #
+    # wally-web solo hace de mensajero: wally-net corre como root y es quien
+    # toca NetworkManager. Así la webapp, expuesta a la red, no necesita
+    # privilegios.
+
+    @app.get("/api/net/status")
+    async def net_status() -> dict[str, Any]:
+        return state.net or {"mode": "unknown"}
+
+    @app.get("/api/net/networks")
+    async def net_networks() -> dict[str, Any]:
+        return {"networks": state.networks}
+
+    @app.post("/api/net/scan")
+    async def net_scan() -> dict[str, Any]:
+        if bus is not None:
+            bus.publish(topics.CMD_NET_SCAN, {})
+        return {"ok": True}
+
+    @app.post("/api/net/connect")
+    async def net_connect(body: dict[str, Any]) -> dict[str, Any]:
+        ssid = str(body.get("ssid", "")).strip()
+        if not ssid:
+            return {"ok": False, "error": "falta el ssid"}
+        if bus is not None:
+            bus.publish(
+                topics.CMD_NET_CONNECT,
+                {"ssid": ssid, "password": body.get("password", "")},
+            )
+        # La conexión tarda y corta la red actual: el cliente debe sondear
+        # /api/net/status, no esperar aquí una respuesta que quizá no llegue.
+        return {"ok": True, "pending": True}
+
+    @app.post("/api/net/hotspot")
+    async def net_hotspot() -> dict[str, Any]:
+        if bus is not None:
+            bus.publish(topics.CMD_NET_HOTSPOT, {})
+        return {"ok": True}
+
+    @app.post("/api/net/forget")
+    async def net_forget(body: dict[str, Any]) -> dict[str, Any]:
+        ssid = str(body.get("ssid", "")).strip()
+        if ssid and bus is not None:
+            bus.publish(topics.CMD_NET_FORGET, {"ssid": ssid})
+        return {"ok": bool(ssid)}
 
     @app.get("/api/health")
     async def api_health() -> dict[str, Any]:

@@ -316,6 +316,192 @@ body {
   box-shadow: 0 0 0 6px rgba(255, 138, 61, 0.16);
 }
 
+/* -- configuración de red ------------------------------------------- */
+
+.pill-button {
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.setup {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(6, 9, 13, 0.86);
+  backdrop-filter: blur(6px);
+  overflow-y: auto;
+}
+
+.setup-panel {
+  width: min(460px, 100%);
+  max-height: 100%;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: #131923;
+}
+
+.setup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setup-head h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.setup button {
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: #24140a;
+  font: 600 13px/1 inherit;
+  cursor: pointer;
+}
+
+.setup button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.setup button.ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.setup-status {
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 13px;
+}
+
+.setup-status.is-ok {
+  border-color: rgba(61, 220, 145, 0.35);
+  color: var(--ok);
+}
+.setup-status.is-warn {
+  border-color: rgba(255, 176, 32, 0.35);
+  color: var(--warn);
+}
+
+.setup-error {
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 92, 92, 0.4);
+  background: rgba(60, 18, 22, 0.6);
+  color: var(--bad);
+  font-size: 13px;
+}
+
+.setup-note {
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.setup-note code {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.setup-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.netlist {
+  display: grid;
+  gap: 4px;
+  max-height: 40vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.netlist-empty {
+  padding: 14px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.netitem {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--text) !important;
+  font-weight: 500 !important;
+  text-align: left;
+}
+
+.netitem.is-selected {
+  border-color: var(--accent) !important;
+  background: rgba(255, 138, 61, 0.12) !important;
+}
+
+.netitem-ssid {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.netitem-meta {
+  flex: none;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.setup-form {
+  display: grid;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+
+.setup-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.setup-form input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  font: inherit;
+}
+
+.setup-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 /* En pantallas estrechas verticales, encoger para que quepa todo. */
 @media (max-height: 420px) {
   .hud-tracks {

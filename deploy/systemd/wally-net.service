@@ -1,0 +1,20 @@
+[Unit]
+Description=Wally - hotspot y configuración de red
+After=network.target NetworkManager.service mosquitto.service
+Wants=NetworkManager.service
+# Sin Wants= sobre mosquitto: si el broker no arranca, este servicio debe
+# levantar el hotspot igualmente. Es la vía de recuperación cuando algo falla.
+
+[Service]
+Type=simple
+# Root: modificar conexiones de NetworkManager requiere privilegios. Es el
+# único servicio de Wally que los necesita, y por eso está separado de la
+# webapp, que sí está expuesta a la red.
+User=root
+WorkingDirectory=/opt/wally
+ExecStart=/opt/wally/.venv/bin/python -m services.net
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

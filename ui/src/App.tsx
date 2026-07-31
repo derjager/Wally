@@ -1,5 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Joystick from "./Joystick";
+import NetworkSetup from "./NetworkSetup";
 import { useControlSocket } from "./useControlSocket";
 import { useTelemetry } from "./useTelemetry";
 
@@ -41,6 +42,19 @@ export default function App() {
   const telemetry = useTelemetry();
   const [videoOk, setVideoOk] = useState(true);
   const [estopOn, setEstopOn] = useState(false);
+  const [showSetup, setShowSetup] = useState(false);
+
+  // En modo hotspot el robot está recién sacado de la caja o perdió la wifi:
+  // lo único útil que se puede hacer es configurar la red, así que se abre
+  // sola esa pantalla.
+  useEffect(() => {
+    fetch("/api/net/status")
+      .then((r) => r.json())
+      .then((s) => {
+        if (s.mode === "hotspot") setShowSetup(true);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleJoystick = useCallback(
     (v: { throttle: number; steer: number }) => setInput(v),
@@ -97,6 +111,10 @@ export default function App() {
             </div>
           ))}
         </div>
+
+        <button className="pill pill-button" onClick={() => setShowSetup(true)}>
+          Red
+        </button>
       </header>
 
       <div className="hud hud-tracks">
@@ -114,6 +132,8 @@ export default function App() {
 
         <Joystick onChange={handleJoystick} disabled={!connected || estopOn} />
       </div>
+
+      {showSetup && <NetworkSetup onClose={() => setShowSetup(false)} />}
     </div>
   );
 }

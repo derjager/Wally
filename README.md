@@ -12,7 +12,7 @@ El diseño completo — hardware, energía, diagrama de conexión y fases — es
 | 0 · Energía y bancada | Esperando componentes |
 | 1 · `wally-motion` | **Código listo**, pendiente de validar con hardware |
 | 2 · Teleoperación web | **Código listo**, probado extremo a extremo en simulación |
-| 3 · Hotspot y red | — |
+| 3 · Hotspot y red | **Código listo**, probado extremo a extremo con broker real |
 | 4 · Cara y voz | — |
 | 5 · Visión (detección) | — |
 | 6 · Autonomía | — |
@@ -35,6 +35,7 @@ Para conducir en el navegador, tres terminales:
 ```bash
 .venv/bin/python -m services.vision --sim         # cámara sintética
 .venv/bin/python -m services.motion --sim         # motores simulados
+.venv/bin/python -m services.net --sim            # red de mentira
 .venv/bin/python -m services.web                  # http://localhost:8080
 ```
 
@@ -82,8 +83,24 @@ wally-face     Cara pixel art en la pantalla
 wally-voice    TTS con Piper
 wally-brain    Máquina de estados de comportamiento
 wally-web      FastAPI: webapp, WebSocket, streaming
-wally-net      Hotspot y configuración de red
+wally-net      Hotspot y configuración de red (único que corre como root)
 ```
+
+### Red
+
+Al arrancar, `wally-net` mira si hay perfiles wifi guardados. Si los hay,
+espera 30 s a que NetworkManager conecte; si no conecta, o no había ninguno,
+levanta el AP **`Wally-Setup`** en `192.168.4.1` y la webapp abre sola la
+pantalla de configuración.
+
+Estando conectado, si se pierde la red durante 2 minutos vuelve al AP para
+poder reconfigurarlo. El plazo es largo a propósito: un router reiniciándose
+no debe dejarte sin control del robot.
+
+`wally-net` es el único servicio que corre como root, porque modificar
+conexiones de NetworkManager lo exige. `wally-web`, que sí está expuesta a la
+red, nunca ejecuta `nmcli`: solo publica mensajes MQTT que `wally-net`
+atiende. Hay una prueba que lo verifica leyendo el propio código fuente.
 
 ### Seguridad
 
@@ -147,3 +164,6 @@ vivo pero dejó de capturar.
 | Se mueve a tirones | Wifi débil: si el intervalo entre comandos supera 500 ms, el watchdog frena a cada rato |
 | Una oruga va al revés | `invert = true` en `config/wally.toml`, no recablear |
 | Arranca y se reinicia solo | Brownout. Revisar el árbol de energía de PLAN.md §4.1 |
+| No aparece `Wally-Setup` | `systemctl status wally-net`; ¿NetworkManager activo? |
+| Tras configurar la wifi no lo encuentro | Ya no está en `Wally-Setup`. Vuelve a tu wifi y usa `http://wally.local:8080` |
+| Se quedó sin red y sin hotspot | Espera 2 min: el AP vuelve solo |

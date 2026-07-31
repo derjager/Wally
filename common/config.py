@@ -101,6 +101,23 @@ class WebConfig:
 
 
 @dataclass(frozen=True)
+class NetConfig:
+    iface: str = "wlan0"
+    ap_ssid: str = "Wally-Setup"
+    # WPA2 exige 8 caracteres como mínimo. Con AP abierto, la contraseña de tu
+    # wifi viajaría en claro por el aire durante la configuración.
+    ap_password: str = "wally1234"
+    # Margen para que NetworkManager conecte a una red conocida al arrancar
+    # antes de rendirse y levantar el AP.
+    boot_timeout_s: float = 30.0
+    # Tiempo sin conexión tras el cual se vuelve al AP para poder
+    # reconfigurar. Generoso a propósito: un router reiniciándose no debe
+    # dejarte sin control. 0 lo desactiva.
+    fallback_after_s: float = 120.0
+    poll_s: float = 5.0
+
+
+@dataclass(frozen=True)
 class MqttConfig:
     host: str = "localhost"
     port: int = 1883
@@ -113,6 +130,7 @@ class Config:
     motion: MotionConfig = field(default_factory=MotionConfig)
     vision: VisionConfig = field(default_factory=VisionConfig)
     web: WebConfig = field(default_factory=WebConfig)
+    net: NetConfig = field(default_factory=NetConfig)
     log_level: str = "INFO"
 
 
@@ -125,6 +143,7 @@ _NESTED: dict[type, dict[str, type]] = {
         "motion": MotionConfig,
         "vision": VisionConfig,
         "web": WebConfig,
+        "net": NetConfig,
     },
     MotionConfig: {"left": MotorPins, "right": MotorPins},
 }

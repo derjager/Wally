@@ -68,19 +68,33 @@ else
     echo "    (cd ui && npm install && npm run build) y vuelve a desplegar."
 fi
 
+echo "==> NetworkManager"
+# wally-net lo necesita para el hotspot de configuración. En Bookworm ya viene
+# activo por defecto, pero una imagen antigua actualizada puede seguir con
+# dhcpcd.
+if ! systemctl is-enabled NetworkManager >/dev/null 2>&1; then
+    echo "    AVISO: NetworkManager no está activo. wally-net no podrá crear"
+    echo "    el hotspot. Actívalo con: sudo raspi-config -> Advanced -> Network Config"
+fi
+
 echo "==> Servicios systemd"
 cp "$INSTALL_DIR"/deploy/systemd/*.service /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable wally-motion wally-vision wally-web
+systemctl enable wally-motion wally-vision wally-web wally-net
 
 cat <<'EOF'
 
 Instalación completa.
 
-  Arrancar:   sudo systemctl start wally-motion wally-vision wally-web
+  Arrancar:   sudo systemctl start wally-motion wally-vision wally-web wally-net
   Ver logs:   journalctl -u wally-motion -f
   Espiar bus: mosquitto_sub -t 'wally/#' -v
   Webapp:     http://wally.local:8080
+
+PRIMERA PUESTA EN MARCHA
+  Si no hay wifi configurada, Wally levanta la red 'Wally-Setup'
+  (contraseña por defecto: wally1234 — cámbiala en config/wally.toml).
+  Conéctate a ella y abre http://192.168.4.1:8080 para elegir tu wifi.
 
 ANTES de conectar la batería a los motores, verifica (PLAN.md §4.6):
   1. XL4015 ajustado a 4.8V con multímetro, desconectado de todo.
