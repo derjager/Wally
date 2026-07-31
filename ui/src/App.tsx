@@ -117,6 +117,27 @@ export default function App() {
         </button>
       </header>
 
+      <div className="hud hud-vision">
+        {telemetry.cat.present && (
+          <div className="cat-badge">
+            🐱 gata a la vista
+            {telemetry.cat.score != null && (
+              <span className="pill-sub">{Math.round(telemetry.cat.score * 100)}%</span>
+            )}
+          </div>
+        )}
+        {telemetry.detections.length > 0 && (
+          <ul className="detections">
+            {telemetry.detections.slice(0, 5).map((d, i) => (
+              <li key={`${d.label}-${i}`} className={d.label === "cat" ? "is-cat" : ""}>
+                <span>{d.label}</span>
+                <span className="detections-score">{Math.round(d.score * 100)}%</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       <div className="hud hud-tracks">
         <TrackBar label="I" value={motion.left ?? 0} />
         <TrackBar label="D" value={motion.right ?? 0} />

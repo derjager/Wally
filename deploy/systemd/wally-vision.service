@@ -12,8 +12,9 @@ ExecStart=/opt/wally/.venv/bin/python -m services.vision
 Restart=always
 RestartSec=3
 
-# La inferencia de la Fase 5 vivirá aquí. Prioridad por debajo de motion, que
-# nunca debe quedarse sin CPU.
+# Aquí corre la inferencia TFLite, que es lo que más CPU consume del sistema.
+# Prioridad por debajo de motion: si la Pi se satura, es preferible perder
+# fotogramas de detección antes que precisión en el lazo de control.
 Nice=5
 
 [Install]

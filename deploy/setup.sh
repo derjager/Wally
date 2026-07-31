@@ -92,9 +92,12 @@ Instalación completa.
   Espiar bus: mosquitto_sub -t 'wally/#' -v
   Webapp:     http://wally.local:8080
 
-VOZ (opcional, ~70 MB)
-  Wally arranca mudo hasta que instales Piper y una voz:
-     bash deploy/install_voice.sh
+EXTRAS OPCIONALES
+  Wally funciona sin ellos: se puede conducir igual, pero estará mudo y ciego
+  de reconocimiento.
+
+  Voz (~70 MB):        bash deploy/install_voice.sh
+  Detección (~5 MB):   bash deploy/install_model.sh
 
 PRIMERA PUESTA EN MARCHA
   Si no hay wifi configurada, Wally levanta la red 'Wally-Setup'

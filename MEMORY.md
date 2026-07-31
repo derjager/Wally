@@ -4,7 +4,7 @@ Contexto del proyecto para retomar el trabajo sin reconstruirlo desde cero.
 Registra lo que **no** se deduce leyendo el código: por qué las cosas son como
 son, qué se descartó y qué falta.
 
-**Actualizar al cerrar cada fase.** Última actualización: 2026-07-31, fin de la Fase 4.
+**Actualizar al cerrar cada fase.** Última actualización: 2026-07-31, fin de la Fase 5.
 
 ---
 
@@ -66,7 +66,10 @@ fusible 10 A, condensadores, resistencias para los divisores.
 | Expresiones | Geometría interpolable, **no sprites** | Permite transiciones suaves sin dibujar fotogramas; sin binarios en el repo |
 | pygame | **`pygame-ce`**, no `pygame` | Mismo API; es el fork mantenido y publica wheels para Python nuevo (el original no compila en 3.14) |
 | Red | NetworkManager (`nmcli`) | Nativo en Bookworm, `ipv4.method shared` da DHCP solo |
+| Detección | **EfficientDet-Lite0** (COCO) por TFLite | ~10 fps en Pi 4 con 4 hilos; incluye la clase `cat` |
 | Detección de la gata | Clase `cat` de COCO, sin entrenar | **No hay otros gatos**; no hace falta identificación individual |
+| Inferencia | **Hilo aparte**, a 5 fps frente a 15 de captura | Detectar cuesta ~100 ms; en el mismo bucle el vídeo iría a trompicones |
+| Overlay | Dibujado **en el servidor**, antes de comprimir | El frame ya se codificaba; sale gratis y vale para `/snapshot.jpg` |
 | Alcance | Solo LAN | Sin acceso remoto. Sin autenticación en la webapp |
 | Voz | Solo hablar | No hay micrófono. Nada de reconocimiento de voz por ahora |
 
@@ -90,6 +93,12 @@ No debilitar ninguno sin una razón muy buena. Cada uno tiene pruebas.
    robot queda inalcanzable y habría que sacarle la SD.
 7. **El ultrasonido no detecta a la gata** — el pelaje absorbe el sonido. Su
    detección viene solo de la cámara.
+8. **La presencia se filtra con histéresis asimétrica** (3 detecciones para
+   aparecer, 12 ausencias para desaparecer). Sin ella el robot reaccionaría al
+   ruido del detector veinte veces en diez segundos.
+9. **Los servicios opcionales degradan, no fallan.** Sin Piper el robot se
+   queda mudo; sin modelo TFLite, ciego de reconocimiento. Ninguno de los dos
+   impide arrancar: un robot teleoperable sigue siendo útil.
 
 ## 5. Bugs encontrados y por qué el código es así
 
@@ -134,6 +143,18 @@ el mismo error puede repetirse en otros servicios.
 Al desbordar buscaba la víctima con `reversed(range(...))`, que da el índice más
 alto, es decir el más reciente. Lo relevante es lo último que pasó.
 
+**`numpy` no estaba declarado como dependencia.**
+Pillow no lo arrastra, y hasta la Fase 5 nadie lo importaba. Al pasar los
+frames como arrays, `wally-vision` moría al primer fotograma. En la Pi habría
+funcionado por accidente, porque `picamera2` sí lo instala — el fallo solo
+aparecía en el portátil.
+
+**Las salidas de TFLite se identifican por forma, no por posición.**
+El orden de los tensores de salida varía entre versiones del modelo. Asumir
+posiciones fijas es la causa habitual de que un modelo nuevo devuelva cajas
+donde se esperaban puntuaciones. Se detectan por su forma, y clases y
+puntuaciones se distinguen porque estas últimas siempre están en [0, 1].
+
 ## 6. Estado por fases
 
 | Fase | Estado |
@@ -143,10 +164,10 @@ alto, es decir el más reciente. Lo relevante es lo último que pasó.
 | 2 · `wally-web` + teleoperación | ✅ Probado extremo a extremo con procesos reales |
 | 3 · `wally-net` | ✅ Probado extremo a extremo con mosquitto real |
 | 4 · `wally-face` + `wally-voice` | ✅ Probado extremo a extremo. Cara verificada visualmente |
-| 5 · Visión (detección) | ⬜ Siguiente candidata |
-| 6 · Autonomía | ⬜ |
+| 5 · Visión (detección) | ✅ Probado extremo a extremo. Overlay verificado visualmente |
+| 6 · `wally-brain` (autonomía) | ⬜ Última. **Necesita sensores reales para validarse** |
 
-114 pruebas, todas sin hardware. Nada se ha probado aún sobre la Pi.
+134 pruebas, todas sin hardware. Nada se ha probado aún sobre la Pi.
 
 ### Verificado extremo a extremo
 
@@ -162,6 +183,11 @@ alto, es decir el más reciente. Lo relevante es lo último que pasó.
 - Los ocho ánimos renderizados a PNG y revisados a ojo. La primera versión se
   veía tosca — rectángulos planos, `curious` ilegible — y se rehízo añadiendo
   brillo en el ojo, esquinas achaflanadas y asimetría entre ojos.
+- Cadena de visión completa: detector → MQTT → telemetría de la webapp y cara.
+  Tres transiciones de presencia en un ciclo, `idle → happy` al aparecer la
+  gata, y `offset_x` publicado para que la Fase 6 pueda girar hacia ella.
+- Overlay renderizado a JPEG y revisado a ojo: caja naranja para la gata, azul
+  para el resto, etiquetas legibles.
 
 ## 7. Convenciones del proyecto
 
@@ -178,17 +204,18 @@ alto, es decir el más reciente. Lo relevante es lo último que pasó.
 common/       bus MQTT, config (TOML), framebus (mmap), topics, logging
 services/
   motion/     GPIO, motores, servos, HC-SR04, watchdog
-  vision/     cámara (Picamera2 o sintética) → /dev/shm
+  vision/     camera · detector (TFLite) · tracker (histéresis) · overlay
   web/        FastAPI, WebSocket, MJPEG, proxy de red
   net/        nmcli, máquina de estados de red
   face/       expressions (geometría) · render (pygame) · state (reglas)
   voice/      tts (backends) · queue (prioridad y anti-repetición)
 ui/           React + Vite (compilar antes de desplegar)
 config/       wally.toml
+models/       coco_labels.txt versionado; el .tflite se descarga
 assets/       voices/ (modelos Piper, no versionados)
-deploy/       setup.sh, install_voice.sh + units de systemd
+deploy/       setup.sh, install_voice.sh, install_model.sh + units systemd
 tools/        drive_test.py
-tests/        114 pruebas
+tests/        134 pruebas
 ```
 
 En `face/`, la separación importa: `state.py` no importa pygame, así que las
@@ -197,13 +224,17 @@ reglas de ánimo y los temporizadores se prueban sin abrir ninguna pantalla.
 ## 9. Al retomar
 
 1. Leer este archivo y el estado de fases.
-2. `.venv/bin/python -m pytest` — deben pasar 114.
+2. `.venv/bin/python -m pytest` — deben pasar 134.
 3. Si llegó el hardware, la prioridad es **Fase 0** (validar energía) y luego
    validar la Fase 1 con motores reales, con el robot suspendido.
-4. Si no, seguir con la **Fase 5** (detección de objetos con TFLite), que no
-   depende de los componentes en tránsito. La cámara ya está capturando desde
-   la Fase 2: solo falta añadir la inferencia dentro de `wally-vision` y
-   publicar `wally/vision/detections`.
+4. Queda la **Fase 6** (`wally-brain`: patrulla, evitar obstáculos, seguir a la
+   gata). Se puede escribir en simulación, pero **ajustarla de verdad exige el
+   robot montado**: las constantes de giro y distancia de frenado dependen de
+   cómo responda el chasis real.
+
+Las piezas que la Fase 6 necesita ya están publicadas: `wally/state/sensors`
+(distancias), `wally/vision/cat` (con `offset_x` en -1..1 para saber hacia qué
+lado girar) y `wally/cmd/drive`, que respeta el watchdog si se refresca.
 
 Preferencia del usuario: planificar mediante preguntas concretas antes de
 escribir código.

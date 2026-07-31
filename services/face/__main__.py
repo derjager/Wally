@@ -96,11 +96,20 @@ def main(argv: list[str] | None = None) -> int:
         def on_look(payload: dict[str, Any]) -> None:
             state.look_at(float(payload.get("x", 0.0)), float(payload.get("y", 0.0)))
 
+        def on_cat(payload: dict[str, Any]) -> None:
+            inputs.cat_visible = bool(payload.get("present", False))
+            # Los ojos siguen a la gata por la pantalla. `offset_x` ya viene
+            # normalizado a -1..1 desde wally-vision.
+            offset = payload.get("offset_x")
+            if inputs.cat_visible and isinstance(offset, (int, float)):
+                state.look_at(float(offset), 0.0)
+
         bus.subscribe(topics.CMD_MOOD, on_mood)
         bus.subscribe(topics.STATE_MOTION, on_motion)
         bus.subscribe(topics.STATE_SENSORS, on_sensors)
         bus.subscribe(topics.STATE_SPEAKING, on_speaking)
         bus.subscribe(topics.CMD_LOOK, on_look)
+        bus.subscribe(topics.VISION_CAT, on_cat)
         bus.start()
 
     running = True

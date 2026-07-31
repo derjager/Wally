@@ -44,12 +44,16 @@ class RobotState:
         self.sensors: dict[str, Any] = {}
         self.net: dict[str, Any] = {}
         self.networks: list[dict[str, Any]] = []
+        self.detections: list[dict[str, Any]] = []
+        self.cat: dict[str, Any] = {}
         self.updated = 0.0
 
     def snapshot(self) -> dict[str, Any]:
         return {
             "motion": self.motion,
             "sensors": self.sensors,
+            "detections": self.detections,
+            "cat": self.cat,
             "age_s": round(time.monotonic() - self.updated, 2) if self.updated else None,
         }
 
@@ -80,10 +84,19 @@ def create_app(cfg: Config, bus: Bus | None = None) -> FastAPI:
         def on_networks(payload: dict[str, Any]) -> None:
             state.networks = payload.get("networks", [])
 
+        def on_detections(payload: dict[str, Any]) -> None:
+            state.detections = payload.get("detections", [])
+            state.updated = time.monotonic()
+
+        def on_cat(payload: dict[str, Any]) -> None:
+            state.cat = payload
+
         bus.subscribe(topics.STATE_MOTION, on_motion)
         bus.subscribe(topics.STATE_SENSORS, on_sensors)
         bus.subscribe(topics.NET_STATUS, on_net)
         bus.subscribe(topics.NET_NETWORKS, on_networks)
+        bus.subscribe(topics.VISION_DETECTIONS, on_detections)
+        bus.subscribe(topics.VISION_CAT, on_cat)
 
     # -- control ---------------------------------------------------------
 

@@ -136,6 +136,31 @@ def test_hablar_tambien_cuenta_como_actividad(face):
     assert face.resolve_mood(160.0) != "sleepy"
 
 
+def test_ver_a_la_gata_pone_contento(face):
+    face.set_inputs(Inputs(cat_visible=True), 100.0)
+    assert face.resolve_mood(100.0) == "happy"
+
+
+def test_la_gata_gana_a_conducir(face):
+    """Es lo más interesante que le pasa a este robot."""
+    face.set_inputs(Inputs(cat_visible=True, moving=True), 100.0)
+    assert face.resolve_mood(100.0) == "happy"
+
+
+def test_un_obstaculo_gana_a_la_gata(face):
+    """Chocar es peor que perderse el saludo."""
+    face.set_inputs(Inputs(cat_visible=True, closest_mm=100.0), 100.0)
+    assert face.resolve_mood(100.0) == "alert"
+
+
+def test_ver_a_la_gata_despierta(face):
+    face.set_inputs(Inputs(), 100.0)
+    assert face.resolve_mood(200.0) == "sleepy"
+
+    face.set_inputs(Inputs(cat_visible=True), 200.0)
+    assert face.resolve_mood(201.0) == "happy"
+
+
 # -- animación -------------------------------------------------------------
 
 

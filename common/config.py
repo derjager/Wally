@@ -86,6 +86,26 @@ class VisionConfig:
     vflip: bool = False
     frame_shm: str = "wally_frame"
 
+    # --- Detección ---
+    model: str = "models/efficientdet_lite0.tflite"
+    labels: str = "models/coco_labels.txt"
+    # Muy por debajo de la captura: detectar cuesta ~100 ms en una Pi 4 y no
+    # hace falta más para reaccionar a un gato. Subirlo se come la CPU que
+    # necesitan el vídeo y el control.
+    inference_fps: float = 5.0
+    min_score: float = 0.45
+    threads: int = 4
+    draw_overlay: bool = True
+
+    # --- Presencia ---
+    # Qué se sigue con histéresis. `cat` de COCO basta: no hay otros gatos en
+    # casa, así que no hace falta identificación individual.
+    track_label: str = "cat"
+    # Asimétrico a propósito: aparecer exige poca evidencia, desaparecer
+    # mucha. Que la gata se tape un momento no significa que se haya ido.
+    appear_hits: int = 3
+    disappear_misses: int = 12
+
 
 @dataclass(frozen=True)
 class WebConfig:

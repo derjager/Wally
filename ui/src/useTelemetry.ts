@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 
+export interface DetectionInfo {
+  label: string;
+  score: number;
+  bbox: [number, number, number, number];
+}
+
 export interface Telemetry {
   motion: {
     left?: number;
@@ -9,10 +15,18 @@ export interface Telemetry {
     servos?: Record<string, number>;
   };
   sensors: Record<string, number | null>;
+  detections: DetectionInfo[];
+  cat: { present?: boolean; score?: number | null; offset_x?: number | null };
   age_s: number | null;
 }
 
-const EMPTY: Telemetry = { motion: {}, sensors: {}, age_s: null };
+const EMPTY: Telemetry = {
+  motion: {},
+  sensors: {},
+  detections: [],
+  cat: {},
+  age_s: null,
+};
 
 /** Panel de estado del robot. Solo lectura, sin efecto sobre el control. */
 export function useTelemetry(): Telemetry {

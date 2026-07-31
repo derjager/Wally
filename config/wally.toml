@@ -61,6 +61,23 @@ jpeg_quality = 80
 hflip = false
 vflip = false
 
+# Detección de objetos. Instalar con deploy/install_model.sh.
+model = "models/efficientdet_lite0.tflite"
+labels = "models/coco_labels.txt"
+# Muy por debajo de la captura: detectar cuesta ~100 ms en una Pi 4 y no hace
+# falta más para reaccionar a un gato. Subirlo se come la CPU del vídeo y el
+# control de motores.
+inference_fps = 5.0
+min_score = 0.45
+threads = 4
+draw_overlay = true
+
+# Qué se sigue con histéresis. 'cat' de COCO basta: no hay otros gatos en casa.
+track_label = "cat"
+# Asimétrico a propósito: aparecer exige poca evidencia, desaparecer mucha.
+appear_hits = 3
+disappear_misses = 12
+
 [face]
 # Lienzo del pixel art. Se escala por el mayor factor entero que quepa en la
 # pantalla: con 480x320 sale x3. Subirlo pierde el aspecto de píxel gordo.

@@ -8,6 +8,9 @@ dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.32",
     "pillow>=10.0",
+    # Los frames viajan como arrays: la inferencia necesita píxeles crudos y
+    # el overlay se dibuja antes de comprimir.
+    "numpy>=1.24",
     # pygame-ce en lugar de pygame: mismo API (`import pygame`), pero es el
     # fork mantenido y publica wheels para las versiones nuevas de Python.
     "pygame-ce>=2.5",

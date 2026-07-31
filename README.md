@@ -14,10 +14,10 @@ Robot de orugas sobre Raspberry Pi 4: visión, cara expresiva, voz y control web
 | 2 · Teleoperación web | Código listo, probado extremo a extremo |
 | 3 · Hotspot y red | Código listo, probado extremo a extremo |
 | 4 · Cara y voz | Código listo, probado extremo a extremo |
-| 5 · Visión (detección) | — |
+| 5 · Visión (detección) | Código listo, probado extremo a extremo |
 | 6 · Autonomía | — |
 
-114 pruebas, todas ejecutables sin hardware.
+134 pruebas, todas ejecutables sin hardware.
 
 ---
 
@@ -49,7 +49,7 @@ sudo apt install mosquitto                                # Linux
 ### A2. Comprobar que todo está bien
 
 ```bash
-.venv/bin/python -m pytest        # deben pasar 114
+.venv/bin/python -m pytest        # deben pasar 134
 ```
 
 ### A3. Conducir en simulación
@@ -67,7 +67,14 @@ Abre **http://localhost:8080**. Verás vídeo sintético y podrás conducir con 
 joystick; en la terminal de `motion` se ve el watchdog liberarse al tocarlo y
 volver a activarse al cerrar la pestaña.
 
+En modo simulación el detector hace **aparecer y desaparecer una gata** cada
+12 segundos, con confianza baja al entrar y salir de plano. Así se prueba la
+histéresis de presencia y la reacción de la cara sin pasear un gato por
+delante de la cámara. Verás las cajas sobre el vídeo y el aviso «gata a la
+vista».
+
 Cada servicio acepta `--no-mqtt` para arrancar aislado, útil al depurar.
+`wally-vision` acepta además `--no-detect` para servir solo vídeo.
 
 ### A4. Ver la cara y oír la voz
 
@@ -197,9 +204,12 @@ sudo nano /opt/wally/config/wally.toml
 **Cambia `ap_password`** en la sección `[net]`. Con el AP abierto, la
 contraseña de tu wifi viajaría en claro durante la configuración.
 
-### C7. Instalar la voz (opcional)
+### C7. Extras opcionales
 
-Wally arranca mudo hasta que tenga Piper y un modelo de voz (~70 MB):
+Wally funciona sin ellos —se puede conducir igual—, pero estará mudo y sin
+reconocer nada.
+
+**Voz** (~70 MB):
 
 ```bash
 bash deploy/install_voice.sh
@@ -208,6 +218,15 @@ bash deploy/install_voice.sh
 
 Si no se oye nada, elige la salida de audio con `sudo raspi-config` → System
 Options → Audio (el jack de 3.5 mm aparece como *Headphones*).
+
+**Detección de objetos** (~5 MB más el runtime):
+
+```bash
+bash deploy/install_model.sh
+```
+
+Descarga EfficientDet-Lite0 (COCO) e instala `tflite-runtime`. Sin esto,
+`wally-vision` sirve vídeo pero no detecta nada, y lo dice en los logs.
 
 ### C8. Arrancar
 
@@ -340,11 +359,31 @@ conexiones de NetworkManager lo exige. `wally-web`, que sí está expuesta a la
 red, nunca ejecuta `nmcli`: solo publica mensajes MQTT. Una prueba lo verifica
 leyendo su código fuente.
 
-### Vídeo
+### Visión
 
 `wally-vision` es el único proceso con acceso a la cámara y publica los frames
 en `/dev/shm/wally_frame` mediante un seqlock; `wally-web` los lee y los sirve
 como MJPEG. No pasan por MQTT: a 15 fps serían ~1 MB/s de serialización inútil.
+
+**La inferencia va en un hilo aparte.** Detectar cuesta ~100 ms en una Pi 4 y
+capturar toca cada 66 ms: hacerlo en el mismo bucle dejaría el vídeo a
+trompicones. Así el vídeo mantiene sus 15 fps y la detección corre a 5 fps,
+que sobra para reaccionar a un gato. Si el hilo está ocupado cuando llega un
+frame nuevo, el anterior se descarta — siempre interesa el más reciente, no
+acumular una cola de fotogramas viejos.
+
+La gata se reconoce con la clase `cat` de COCO, **sin entrenar nada**: no hay
+otros gatos en casa, así que distinguir individuos sería trabajo desperdiciado.
+
+La presencia se filtra con **histéresis asimétrica**: aparecer exige 3
+detecciones seguidas, desaparecer exige 12 fotogramas sin verla. Un detector
+es ruidoso, y sin este filtro el robot anunciaría «¡la gata!» y se callaría
+veinte veces en diez segundos. Que se tape un momento no significa que se haya
+ido, y perder el rastro es menos grave que perseguir un fantasma.
+
+El overlay se dibuja en el servidor, antes de comprimir: el frame ya se iba a
+codificar, así que sale casi gratis, y aparece también en `/snapshot.jpg` sin
+que el cliente tenga que alinear coordenadas con el vídeo.
 
 Deliberadamente **no** se usa `multiprocessing.shared_memory`: su
 `resource_tracker` hace unlink del segmento cuando termina cualquier proceso que
@@ -389,6 +428,9 @@ mosquitto_pub -t wally/cmd/say  -m '{"text":"Batería baja","priority":"urgent"}
 # Red
 mosquitto_pub -t wally/cmd/net/scan -m '{}'
 mosquitto_pub -t wally/cmd/net/hotspot -m '{}'
+
+# Ver lo que detecta
+mosquitto_sub -t 'wally/vision/#' -v
 ```
 
 ### Actualizar el código
@@ -424,3 +466,7 @@ sudo systemctl restart wally-motion wally-vision wally-web wally-net
 | Wally no habla | ¿Instalaste `deploy/install_voice.sh`? En los logs, `backend de voz: LogBackend` significa que no encontró Piper |
 | Habla pero no se oye | `aplay -l` y `raspi-config` → System Options → Audio |
 | La cara siempre está dormida | Nadie publica estado. ¿Corren `wally-motion` y `mosquitto`? |
+| Hay vídeo pero no detecta nada | ¿Ejecutaste `deploy/install_model.sh`? En los logs aparecerá «sin detección de objetos» |
+| El vídeo va a tirones al detectar | Baja `inference_fps` en `config/wally.toml` |
+| No reconoce a la gata | Con poca luz el modelo falla. Baja `min_score` o enciende los LEDs IR |
+| Detecta la gata donde no está | Sube `min_score`, o `appear_hits` para exigir más evidencia |

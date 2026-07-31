@@ -22,6 +22,7 @@ PRIORITY = {
     "estop": 100,
     "commanded": 80,
     "obstacle": 60,
+    "cat": 50,
     "driving": 40,
     "idle_timeout": 20,
     "default": 0,
@@ -41,6 +42,7 @@ class Inputs:
     moving: bool = False
     closest_mm: float | None = None
     speaking: bool = False
+    cat_visible: bool = False
 
 
 class FaceState:
@@ -82,7 +84,8 @@ class FaceState:
         self._last_activity = now
 
     def set_inputs(self, inputs: Inputs, now: float) -> None:
-        if self._last_activity is None or inputs.moving or inputs.speaking or inputs.estop:
+        activo = inputs.moving or inputs.speaking or inputs.estop or inputs.cat_visible
+        if self._last_activity is None or activo:
             self._last_activity = now
         self._inputs = inputs
 
@@ -103,6 +106,11 @@ class FaceState:
         closest = self._inputs.closest_mm
         if closest is not None and closest < OBSTACLE_MM:
             return "alert"
+
+        # Ver a la gata gana a conducir: es lo más interesante que le pasa a
+        # este robot.
+        if self._inputs.cat_visible:
+            return "happy"
 
         if self._inputs.moving:
             return "teleop"
