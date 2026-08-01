@@ -2,8 +2,9 @@
 
 Robot de orugas sobre Raspberry Pi 4: visión, cara expresiva, voz y control web.
 
-- **[PLAN.md](PLAN.md)** — diseño completo: hardware, energía, diagrama de conexión y fases.
+- **[PLAN.md](PLAN.md)** — diseño completo: hardware, energía, conexionado y fases.
 - **[MEMORY.md](MEMORY.md)** — estado del proyecto y decisiones tomadas.
+- **[docs/wiring.svg](docs/wiring.svg)** — diagrama de conexión ([ver abajo](#parte-b--montaje-del-hardware)).
 
 ## Estado
 
@@ -109,6 +110,15 @@ Solo motores, sin navegador:
 ---
 
 ## Parte B · Montaje del hardware
+
+![Diagrama de conexión de Wally](docs/wiring.svg)
+
+El diagrama se genera desde `common/config.py`, así que **no puede
+desincronizarse del código**. Si cambias un pin en la configuración:
+
+```bash
+.venv/bin/python tools/make_wiring_diagram.py
+```
 
 > ⚠️ **Este orden no es opcional.** Los motores FA-130 son de 3V nominales y la
 > LiPo 2S entrega 8.4V a plena carga. Conectarla directo al `VM` del TB6612 los

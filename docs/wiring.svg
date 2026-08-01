@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 990" width="1160" height="990" role="img" aria-label="Diagrama de conexión de Wally">
+<rect width="1160" height="990" fill="#0f1319"/>
+<text x="40" y="46" fill="#e8ecf2" font-size="22" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif" text-anchor="start">WALLY · Diagrama de conexión</text>
+<text x="40" y="68" fill="#8b97a8" font-size="12" font-weight="400" font-family="ui-sans-serif,system-ui,sans-serif" text-anchor="start">Pines generados desde common/config.py · Numeración BCM, (pN) = pin físico del header</text>
+<text x="40" y="108" fill="#8b97a8" font-size="11.5" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif" text-anchor="start">ALIMENTACIÓN</text>
+<rect x="40" y="122" width="268" height="88" rx="10" fill="#19212e" stroke="#2c3648" stroke-width="1.5"/>
+<text x="54" y="147" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">LiPo 2S</text>
+<text x="54" y="166" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">7.4 V nominal · 8.4 V cargada</text>
+<text x="54" y="190" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">5500 mAh 35C · corte a 6.6 V</text>
+<rect x="40" y="232" width="268" height="44" rx="10" fill="#19212e" stroke="#2c3648" stroke-width="1.5"/>
+<text x="54" y="257" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Fusible 10 A  +  Interruptor</text>
+<rect x="40" y="300" width="268" height="86" rx="10" fill="#19212e" stroke="#ffb020" stroke-width="1.5"/>
+<text x="54" y="325" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">BEC / UBEC  -&gt;  5 V</text>
+<text x="54" y="344" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">switching, &gt;=3 A · RIEL DE LÓGICA</text>
+<text x="54" y="368" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">cap 470 µF a la salida</text>
+<rect x="40" y="406" width="268" height="86" rx="10" fill="#19212e" stroke="#ff5c5c" stroke-width="1.5"/>
+<text x="54" y="431" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">XL4015  -&gt;  4.8 V</text>
+<text x="54" y="450" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">ajustable · RIEL DE POTENCIA</text>
+<text x="54" y="474" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">cap 1000 µF a la salida</text>
+<path d="M174,210 L174,232" fill="none" stroke="#ff5c5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M174,276 L174,288" fill="none" stroke="#ff5c5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M100,288 L248,288" fill="none" stroke="#ff5c5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M100,288 L100,300" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M248,288 L248,400 L174,400 L174,406" fill="none" stroke="#ff5c5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="40" y="512" width="268" height="112" rx="10" fill="#19212e" stroke="#7c8797" stroke-width="1.5"/>
+<text x="54" y="537" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">MASA COMUN</text>
+<text x="54" y="556" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">obligatoria</text>
+<text x="54" y="580" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">LiPo -  ·  BEC -  ·  XL4015 -</text>
+<text x="54" y="597" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">Pi GND  ·  TB6612 GND</text>
+<text x="54" y="614" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">servos GND  ·  HC-SR04 GND</text>
+<rect x="372" y="122" width="316" height="590" rx="10" fill="#19212e" stroke="#ff8a3d" stroke-width="1.5"/>
+<text x="386" y="147" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Raspberry Pi 4 Model B</text>
+<text x="386" y="166" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">4 GB · Raspberry Pi OS Bookworm 64-bit</text>
+<text x="386" y="190" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">5 V  (p2 / p4)</text>
+<text x="674" y="190" fill="#ffb020" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- BEC</text>
+<text x="386" y="207" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GND (p6, p9, p14…)</text>
+<text x="674" y="207" fill="#7c8797" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- masa</text>
+<text x="386" y="224" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">3.3 V (p1)</text>
+<text x="674" y="224" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; TB6612 VCC</text>
+<path d="M386,233 L674,233" fill="none" stroke="#2c3648" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="386" y="251" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO12 (p32)</text>
+<text x="674" y="251" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; PWMA</text>
+<text x="386" y="268" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO20 (p38)</text>
+<text x="674" y="268" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; AIN1</text>
+<text x="386" y="285" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO21 (p40)</text>
+<text x="674" y="285" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; AIN2</text>
+<text x="386" y="302" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO13 (p33)</text>
+<text x="674" y="302" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; PWMB</text>
+<text x="386" y="319" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO16 (p36)</text>
+<text x="674" y="319" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; BIN1</text>
+<text x="386" y="336" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO26 (p37)</text>
+<text x="674" y="336" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; BIN2</text>
+<text x="386" y="353" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO25 (p22)</text>
+<text x="674" y="353" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; STBY</text>
+<path d="M386,362 L674,362" fill="none" stroke="#2c3648" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="386" y="380" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO18 (p12)</text>
+<text x="674" y="380" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; servo izq</text>
+<text x="386" y="397" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO23 (p16)</text>
+<text x="674" y="397" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; servo der</text>
+<path d="M386,406 L674,406" fill="none" stroke="#2c3648" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="386" y="424" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO4 (p7)</text>
+<text x="674" y="424" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; TRIG front</text>
+<text x="386" y="441" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO17 (p11)</text>
+<text x="674" y="441" fill="#ff5c5c" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- ECHO front (!)</text>
+<text x="386" y="458" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO5 (p29)</text>
+<text x="674" y="458" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; TRIG left</text>
+<text x="386" y="475" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO27 (p13)</text>
+<text x="674" y="475" fill="#ff5c5c" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- ECHO left (!)</text>
+<text x="386" y="492" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO6 (p31)</text>
+<text x="674" y="492" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; TRIG right</text>
+<text x="386" y="509" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO22 (p15)</text>
+<text x="674" y="509" fill="#ff5c5c" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- ECHO right (!)</text>
+<path d="M386,518 L674,518" fill="none" stroke="#2c3648" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="386" y="536" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO24 (p18)</text>
+<text x="674" y="536" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; LEDs IR (transistor)</text>
+<text x="386" y="553" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">CSI</text>
+<text x="674" y="553" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; cámara OV5647</text>
+<text x="386" y="570" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">micro-HDMI</text>
+<text x="674" y="570" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; pantalla 3.5"</text>
+<text x="386" y="587" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">jack 3.5 mm</text>
+<text x="674" y="587" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; audio</text>
+<path d="M308,336 L340,336 L340,200 L372,200" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="372,200 365,195.5 365,204.5" fill="#ffb020"/>
+<rect x="325.4" y="151" width="29.200000000000003" height="16" rx="4" fill="#0f1319" opacity="0.92"/>
+<text x="340" y="163" fill="#ffb020" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">5 V</text>
+<rect x="756" y="122" width="364" height="244" rx="10" fill="#19212e" stroke="#5ac8fa" stroke-width="1.5"/>
+<text x="770" y="147" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">TB6612FNG</text>
+<text x="770" y="166" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">driver dual de motores</text>
+<text x="770" y="190" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">VM</text>
+<text x="1106" y="190" fill="#ff5c5c" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- 4.8 V (XL4015)</text>
+<text x="770" y="207" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">VCC</text>
+<text x="1106" y="207" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- 3.3 V (Pi p1)</text>
+<text x="770" y="224" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GND</text>
+<text x="1106" y="224" fill="#7c8797" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- masa común</text>
+<text x="770" y="241" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">STBY</text>
+<text x="1106" y="241" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- GPIO25 (p22)</text>
+<text x="770" y="258" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">PWMA / AIN1 / AIN2</text>
+<text x="1106" y="258" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- Pi</text>
+<text x="770" y="275" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">PWMB / BIN1 / BIN2</text>
+<text x="1106" y="275" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- Pi</text>
+<text x="770" y="292" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">AO1 · AO2</text>
+<text x="1106" y="292" fill="#ff8a3d" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; motor izquierdo</text>
+<text x="770" y="309" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">BO1 · BO2</text>
+<text x="1106" y="309" fill="#ff8a3d" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; motor derecho</text>
+<text x="770" y="350" fill="#ff5c5c" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">STBY bajo = parada de emergencia por hardware</text>
+<rect x="756" y="386" width="364" height="76" rx="10" fill="#19212e" stroke="#ff8a3d" stroke-width="1.5"/>
+<text x="770" y="411" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Motores Tamiya FA-130</text>
+<text x="770" y="430" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">3 V nominales (1.5–3 V)</text>
+<text x="770" y="454" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">tope de duty al 60 % -&gt; ~2.6 V efectivos</text>
+<rect x="756" y="482" width="364" height="68" rx="10" fill="#19212e" stroke="#ff5c5c" stroke-width="1.5"/>
+<text x="770" y="507" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">2 x servo (brazos)</text>
+<text x="770" y="526" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">&lt;- 4.8 V del XL4015, NO de la Pi</text>
+<rect x="756" y="570" width="364" height="172" rx="10" fill="#19212e" stroke="#5ac8fa" stroke-width="1.5"/>
+<text x="770" y="595" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">3 x HC-SR04</text>
+<text x="770" y="614" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">frontal + diagonales a 35° · VCC a 5 V</text>
+<text x="770" y="638" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">front</text>
+<text x="834" y="638" fill="#5ac8fa" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">TRIG GPIO4 (p7)</text>
+<text x="1106" y="638" fill="#ff5c5c" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">ECHO GPIO17 (p11)</text>
+<text x="770" y="656" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">left</text>
+<text x="834" y="656" fill="#5ac8fa" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">TRIG GPIO5 (p29)</text>
+<text x="1106" y="656" fill="#ff5c5c" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">ECHO GPIO27 (p13)</text>
+<text x="770" y="674" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">right</text>
+<text x="834" y="674" fill="#5ac8fa" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">TRIG GPIO6 (p31)</text>
+<text x="1106" y="674" fill="#ff5c5c" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">ECHO GPIO22 (p15)</text>
+<text x="770" y="702" fill="#ff5c5c" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">cada ECHO vía divisor (!)</text>
+<text x="770" y="719" fill="#8b97a8" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">disparo secuencial: a la vez hay crosstalk</text>
+<path d="M308,442 L336,442 L336,96 L816,96 L816,122" fill="none" stroke="#ff5c5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="816,122 823,117.5 823,126.5" fill="#ff5c5c"/>
+<rect x="631.0" y="87" width="138.0" height="16" rx="4" fill="#0f1319" opacity="0.92"/>
+<text x="700" y="99" fill="#ff5c5c" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">4.8 V -&gt; VM y servos</text>
+<path d="M688,300 L756,300" fill="none" stroke="#5ac8fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polygon points="756,300 749,295.5 749,304.5" fill="#5ac8fa"/>
+<rect x="688.2" y="277" width="67.6" height="16" rx="4" fill="#0f1319" opacity="0.92"/>
+<text x="722" y="289" fill="#5ac8fa" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">7 señales</text>
+<path d="M688,640 L722,640 L722,612 L756,612" fill="none" stroke="#5ac8fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polygon points="756,612 749,607.5 749,616.5" fill="#5ac8fa"/>
+<path d="M938,366 L938,386" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="372" y="764" width="316" height="172" rx="10" fill="#19212e" stroke="#ff5c5c" stroke-width="1.5"/>
+<text x="386" y="789" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">(!) Divisor en cada ECHO</text>
+<text x="386" y="808" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">obligatorio · 3 unidades</text>
+<path d="M402,852 L472,852" fill="none" stroke="#ff5c5c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="402" y="840" fill="#ff5c5c" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">ECHO 5 V</text>
+<rect x="472" y="843" width="46" height="18" rx="3" fill="#19212e" stroke="#e8ecf2" stroke-width="1.5"/>
+<text x="495" y="856" fill="#e8ecf2" font-size="10" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">1 kΩ</text>
+<path d="M518,852 L588,852" fill="none" stroke="#5ac8fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="592" y="856" fill="#5ac8fa" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">-&gt; GPIO 3.3 V</text>
+<path d="M553,852 L553,878" fill="none" stroke="#7c8797" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="530" y="878" width="46" height="18" rx="3" fill="#19212e" stroke="#e8ecf2" stroke-width="1.5"/>
+<text x="553" y="891" fill="#e8ecf2" font-size="10" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">2 kΩ</text>
+<path d="M553,896 L553,914" fill="none" stroke="#7c8797" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M539,914 L567,914" fill="none" stroke="#7c8797" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M544,919 L562,919" fill="none" stroke="#7c8797" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M549,924 L557,924" fill="none" stroke="#7c8797" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="386" y="920" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">5 V x 2k/(1k+2k) = 3.33 V OK</text>
+<rect x="756" y="764" width="364" height="172" rx="10" fill="#19212e" stroke="#ff5c5c" stroke-width="1.5"/>
+<text x="770" y="789" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">(!) Antes de conectar nada</text>
+<text x="770" y="812" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">Ajusta el XL4015 a 4.8 V con multímetro,</text>
+<text x="770" y="827" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">desconectado de todo.</text>
+<text x="770" y="857" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">La LiPo da 8.4 V y los motores son de 3 V:</text>
+<text x="770" y="872" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">conectarla directa al VM los quema.</text>
+<text x="770" y="902" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">Nunca USB-C y 5 V del header a la vez.</text>
+<text x="770" y="917" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">Sin masa común, las señales flotan.</text>
+<rect x="40" y="764" width="268" height="172" rx="10" fill="#19212e" stroke="#2c3648" stroke-width="1.5"/>
+<text x="54" y="789" fill="#e8ecf2" font-size="15" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Leyenda</text>
+<path d="M58,808 L92,808" fill="none" stroke="#ff5c5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="102" y="812" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">4.8 V — riel de potencia</text>
+<path d="M58,829 L92,829" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="102" y="833" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">5 V — riel de lógica</text>
+<path d="M58,850 L92,850" fill="none" stroke="#5ac8fa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="102" y="854" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">señal GPIO 3.3 V</text>
+<path d="M58,871 L92,871" fill="none" stroke="#7c8797" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="102" y="875" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">masa</text>
+<path d="M58,892 L92,892" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="102" y="896" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">salida a motores</text>
+<path d="M58,913 L92,913" fill="none" stroke="#ff5c5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="102" y="917" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">requiere atención</text>
+<text x="40" y="966" fill="#8b97a8" font-size="11" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">Generado por tools/make_wiring_diagram.py · detalles en PLAN.md §4</text>
+</svg>

@@ -242,8 +242,9 @@ ui/           React + Vite (compilar antes de desplegar)
 config/       wally.toml
 models/       coco_labels.txt versionado; el .tflite se descarga
 assets/       voices/ (modelos Piper, no versionados)
+docs/         wiring.svg (generado, no editar a mano)
 deploy/       setup.sh, install_voice.sh, install_model.sh + units systemd
-tools/        drive_test.py
+tools/        drive_test.py · make_wiring_diagram.py
 tests/        168 pruebas
 ```
 
@@ -251,6 +252,10 @@ La separación se repite en los tres servicios con lógica interesante:
 `face/state.py` no importa pygame y `brain/behaviors.py` no importa MQTT, así
 que las reglas y los temporizadores se prueban sin abrir una pantalla ni
 levantar un broker.
+
+**`docs/wiring.svg` es generado, no se edita a mano.** Lee los pines de
+`common/config.py`, así que el diagrama no puede desincronizarse del código.
+Tras cambiar un pin: `python tools/make_wiring_diagram.py`.
 
 ## 9. Al retomar
 
