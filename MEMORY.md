@@ -22,7 +22,7 @@ Documentos: [PLAN.md](PLAN.md) es el diseño (hardware, energía, conexionado);
 
 | Componente | Detalle |
 |---|---|
-| Cómputo | Raspberry Pi 4 Model B 4 GB · Raspberry Pi OS Bookworm 64-bit · SD 64 GB |
+| Cómputo | Raspberry Pi 4 Model B 4 GB · **Raspberry Pi OS Lite Bookworm 64-bit** · SD 64 GB |
 | Tracción | Chasis Tamiya 70108 + gearbox de 2 motores **FA-130 (3V nominales)** |
 | Driver | SparkFun TB6612FNG dual |
 | Cámara | OV5647 con LEDs IR |
@@ -66,6 +66,7 @@ fusible 10 A, condensadores, resistencias para los divisores.
 | Cara | Pygame a framebuffer (KMSDRM), **pixel art** | Render a 160×106 escalado por factor **entero** (×3) |
 | Expresiones | Geometría interpolable, **no sprites** | Permite transiciones suaves sin dibujar fotogramas; sin binarios en el repo |
 | pygame | **`pygame-ce`**, no `pygame` | Mismo API; es el fork mantenido y publica wheels para Python nuevo (el original no compila en 3.14) |
+| SO | **Lite**, sin escritorio | La cara dibuja al framebuffer; un entorno gráfico sólo competiría por RAM y CPU con la visión |
 | Red | NetworkManager (`nmcli`) | Nativo en Bookworm, `ipv4.method shared` da DHCP solo |
 | Detección | **EfficientDet-Lite0** (COCO) por TFLite | ~10 fps en Pi 4 con 4 hilos; incluye la clase `cat` |
 | Detección de la gata | Clase `cat` de COCO, sin entrenar | **No hay otros gatos**; no hace falta identificación individual |
@@ -277,6 +278,20 @@ orden:
 
 Al desplegar: compilar la UI en el portátil (`cd ui && npm run build`) antes de
 sincronizar, para que la Pi no necesite npm.
+
+Detalles de **Raspberry Pi OS Lite** que cuestan tiempo si se olvidan:
+
+- `python3-picamera2` **no viene preinstalado** (sí en la imagen con
+  escritorio). Va por apt, nunca por pip: depende de libcamera compilado contra
+  el sistema.
+- Por eso el venv se crea con `--system-site-packages`; sin eso, picamera2 no
+  se ve desde dentro.
+- No hay servidor de audio: se usa ALSA directo (`aplay`), que es justo lo que
+  espera `wally-voice`.
+- La pantalla HDMI necesita `video=HDMI-A-1:480x320M@60` en
+  `/boot/firmware/cmdline.txt`. Los ajustes `hdmi_*` de los tutoriales
+  antiguos sólo funcionan con `vc4-fkms-v3d`, no con el KMS de Bookworm.
+- Si la consola parpadea detrás de la cara: `systemctl disable getty@tty1`.
 
 Preferencia del usuario: planificar mediante preguntas concretas antes de
 escribir código.

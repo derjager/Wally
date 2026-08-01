@@ -160,75 +160,178 @@ gente se salta:
 
 ## Parte C · Instalación en la Raspberry Pi
 
-### C1. Preparar la tarjeta
+Escrito para **Raspberry Pi OS Lite (64-bit)**, sin escritorio. Es la opción
+correcta para este proyecto: la cara dibuja directo al framebuffer y no hace
+falta un entorno gráfico compitiendo por los 4 GB de RAM y por la CPU que
+necesita la visión.
 
-Raspberry Pi OS **Bookworm 64-bit**. Con Raspberry Pi Imager, en los ajustes
-previos (engranaje) configura hostname `wally`, activa SSH y pon tu wifi — así
-puedes entrar sin monitor.
+Tiempo total: unos 40 minutos, casi todo esperando descargas.
 
-### C2. Comprobar NetworkManager
+### C1. Grabar la tarjeta
 
-`wally-net` lo necesita para el hotspot. En Bookworm viene activo por defecto:
+Descarga [Raspberry Pi Imager](https://www.raspberrypi.com/software/) y elige:
+
+- **Dispositivo:** Raspberry Pi 4
+- **Sistema:** Raspberry Pi OS (other) → **Raspberry Pi OS Lite (64-bit)**
+- **Almacenamiento:** tu SD de 64 GB
+
+Antes de grabar, pulsa el **engranaje** (o *Editar ajustes*) y configura:
+
+| Ajuste | Valor |
+|---|---|
+| Hostname | `wally` |
+| Usuario | el que quieras (aquí se asume `claudio`) |
+| Wifi | tu red de casa, país `CL` |
+| Zona horaria / teclado | `America/Santiago` / `es` |
+| **Habilitar SSH** | ✅ con autenticación por contraseña o clave |
+
+Configurar la wifi aquí te ahorra necesitar monitor y teclado: la Pi arranca
+ya conectada. (Aun así, `wally-net` levantará su hotspot si algún día pierde la
+red.)
+
+### C2. Primer arranque y acceso
+
+Mete la tarjeta, alimenta la Pi por USB-C **y nada más** —sin motores todavía—
+y espera un par de minutos al primer arranque.
 
 ```bash
-systemctl is-enabled NetworkManager     # debe decir "enabled"
+ssh claudio@wally.local
 ```
 
-Si no lo está: `sudo raspi-config` → Advanced Options → Network Config →
-NetworkManager.
+Si `wally.local` no resuelve, busca la IP en tu router y usa esa. Que mDNS
+funcione depende de tu red; el resto de la guía no lo necesita.
 
-### C3. Activar la cámara
+### C3. Actualizar el sistema
 
 ```bash
-libcamera-hello --list-cameras          # debe listar el ov5647
+sudo apt update && sudo apt full-upgrade -y
+sudo reboot
 ```
 
-### C4. Copiar el proyecto
+Tarda un rato la primera vez. Vuelve a entrar por SSH cuando reinicie.
 
-Compila la UI en tu equipo antes (la Pi no necesita npm así):
+### C4. Ajustes base del sistema
 
 ```bash
+sudo raspi-config
+```
+
+Comprueba estas cuatro cosas:
+
+| Menú | Qué hacer |
+|---|---|
+| **Advanced Options → Expand Filesystem** | Que use toda la tarjeta. Suele hacerse solo, pero conviene verificar |
+| **Advanced Options → Network Config** | Debe estar en **NetworkManager**. `wally-net` lo necesita para el hotspot |
+| **System Options → Audio** | Elige **Headphones** (el jack de 3.5 mm) |
+| **Interface Options → I2C** | Actívalo si vas a poner un ADS1115 para medir la batería |
+
+En Bookworm la cámara se detecta sola, así que **no** hay que activar nada de
+*Legacy Camera* — esa opción ya no existe y activarla rompería libcamera.
+
+Verifica el espacio disponible antes de seguir:
+
+```bash
+df -h /        # necesitas al menos 1.2 GB libres
+```
+
+### C5. Comprobar la cámara
+
+Conecta el OV5647 al puerto **CAMERA** (con la Pi apagada; el cable plano va
+con los contactos hacia el conector, no hacia el jack de audio) y comprueba:
+
+```bash
+libcamera-hello --list-cameras
+```
+
+Debe aparecer `ov5647`. Si no sale nada, apaga y revisa que el cable esté bien
+asentado por ambos extremos — es el fallo habitual.
+
+### C6. Herramientas mínimas
+
+Raspberry Pi OS Lite viene muy pelado. Instala lo justo para poder trabajar:
+
+```bash
+sudo apt install -y git rsync
+```
+
+El resto de dependencias las instala `setup.sh` en el paso C8.
+
+### C7. Copiar el proyecto
+
+**Compila la interfaz web en tu equipo primero**, así la Pi no necesita Node:
+
+```bash
+# En tu Mac/PC, dentro del proyecto
 cd ui && npm run build && cd ..
+
 rsync -av --exclude .venv --exclude node_modules --exclude .git \
-    ./ wally@wally.local:~/wally/
+    ./ claudio@wally.local:~/wally/
 ```
 
-### C5. Instalar
+Si prefieres clonarlo desde un repositorio, hazlo en `~/wally` y ejecuta el
+`npm run build` en la Pi (necesitarás `sudo apt install nodejs npm`, unos
+200 MB más).
 
-En la Pi:
+### C8. Instalar
 
 ```bash
 cd ~/wally
 sudo bash deploy/setup.sh
 ```
 
-El script instala paquetes (pigpio, mosquitto, picamera2, avahi), crea el
-usuario de servicio `wally`, prepara el entorno virtual en `/opt/wally`,
-compila la UI si hace falta y registra los servicios de systemd.
+El script hace todo lo siguiente, y es **idempotente**: puedes volver a
+ejecutarlo sin romper nada.
 
-### C6. Configurar
+1. Comprueba espacio en disco y conexión a internet.
+2. Instala los paquetes del sistema: `pigpio`, `mosquitto`, `avahi-daemon`,
+   `alsa-utils`, las bibliotecas SDL2 que necesita pygame y **`python3-picamera2`**
+   (que en Lite no viene preinstalado).
+3. Habilita y arranca `pigpiod` y `mosquitto`.
+4. Crea el usuario de servicio `wally` en los grupos `gpio`, `video`, `render`,
+   `audio` e `input`.
+5. Copia el código a `/opt/wally` y crea el entorno virtual con
+   `--system-site-packages`, para que `picamera2` sea visible dentro.
+6. Instala las dependencias de Python desde wheels precompiladas.
+7. Registra los siete servicios de systemd y los habilita al arranque.
+8. **Imprime una comprobación** de qué quedó funcionando y qué falta.
 
-```bash
-sudo nano /opt/wally/config/wally.toml
+Al terminar verás algo así:
+
+```
+==> Comprobación
+    OK    pigpiod corriendo
+    OK    mosquitto corriendo
+    OK    NetworkManager activo
+    OK    paquetes de Python
+    OK    picamera2 visible
+    OK    pigpio (GPIO)
+    OK    cámara detectada
+    OK    interfaz web compilada
+    FALTA modelo de detección
+    FALTA voz instalada
 ```
 
-**Cambia `ap_password`** en la sección `[net]`. Con el AP abierto, la
-contraseña de tu wifi viajaría en claro durante la configuración.
+Los dos últimos son extras opcionales, que se instalan en C9.
 
-### C7. Extras opcionales
+### C9. Extras opcionales
 
-Wally funciona sin ellos —se puede conducir igual—, pero estará mudo y sin
-reconocer nada.
+Wally funciona sin ellos —se conduce igual— pero estará mudo y sin reconocer
+nada.
 
-**Voz** (~70 MB):
+**Voz** (~70 MB): descarga Piper y una voz neural en español.
 
 ```bash
+cd ~/wally
 bash deploy/install_voice.sh
 .venv/bin/python -m services.voice --say "Hola, soy Wally"
 ```
 
-Si no se oye nada, elige la salida de audio con `sudo raspi-config` → System
-Options → Audio (el jack de 3.5 mm aparece como *Headphones*).
+Si no se oye nada, revisa la salida de audio:
+
+```bash
+aplay -l                    # lista las tarjetas; busca "Headphones"
+speaker-test -t sine -f 440 -c 2 -l 1
+```
 
 **Detección de objetos** (~5 MB más el runtime):
 
@@ -236,18 +339,87 @@ Options → Audio (el jack de 3.5 mm aparece como *Headphones*).
 bash deploy/install_model.sh
 ```
 
-Descarga EfficientDet-Lite0 (COCO) e instala `tflite-runtime`. Sin esto,
-`wally-vision` sirve vídeo pero no detecta nada, y lo dice en los logs.
+Descarga EfficientDet-Lite0 (COCO, incluye la clase `cat`) e instala
+`tflite-runtime`.
 
-### C8. Arrancar
+### C10. Configurar la pantalla de 3.5"
+
+> Este es el paso con más fricción de toda la instalación. Presupuesta una
+> sesión entera si la pantalla no arranca a la primera.
+
+Conecta la pantalla por **micro-HDMI** (hace falta adaptador; la Pi 4 no trae
+HDMI de tamaño completo) y edita:
+
+```bash
+sudo nano /boot/firmware/cmdline.txt
+```
+
+Añade al final de la **única línea** que hay, separado por un espacio:
+
+```
+video=HDMI-A-1:480x320M@60
+```
+
+Reinicia y comprueba que la consola sale en la pantalla. Si sigue en negro,
+prueba la vía antigua en `/boot/firmware/config.txt`:
+
+```ini
+hdmi_force_hotplug=1
+hdmi_group=2
+hdmi_mode=87
+hdmi_cvt=480 320 60 6 0 0 0
+hdmi_drive=2
+```
+
+Esos ajustes `hdmi_*` sólo funcionan con el driver de firmware, así que en ese
+caso hay que cambiar también el overlay a `dtoverlay=vc4-fkms-v3d`. Los
+tutoriales antiguos usan esta segunda vía porque son anteriores a Bookworm.
+
+**El táctil no se conecta.** Estas pantallas suelen usar táctil resistivo por
+SPI, que consumiría 7 pines GPIO —incluidos dos ya asignados— y no aporta
+nada: la cara es sólo salida visual y todo el control va por la webapp.
+
+Si al arrancar la cara ves el cursor de la consola parpadeando por detrás:
+
+```bash
+sudo systemctl disable getty@tty1
+```
+
+### C11. Configurar y arrancar
+
+```bash
+sudo nano /opt/wally/config/wally.toml
+```
+
+**Cambia `ap_password`** en la sección `[net]`. Con el hotspot abierto, la
+contraseña de tu wifi viajaría en claro durante la configuración inicial.
 
 ```bash
 sudo systemctl start wally-motion wally-vision wally-web wally-net \
-                     wally-face wally-voice
-sudo systemctl status wally-motion
+                     wally-face wally-voice wally-brain
+
+systemctl status 'wally-*' --no-pager
 ```
 
-Los servicios ya quedan habilitados para arrancar solos al encender.
+Los servicios ya quedan habilitados para arrancar solos al encender. Comprueba
+que el sistema responde:
+
+```bash
+curl http://wally.local:8080/api/health
+mosquitto_sub -t 'wally/#' -v      # Ctrl-C para salir
+```
+
+### Si algo falla en la instalación
+
+| Síntoma | Causa habitual |
+|---|---|
+| `setup.sh` aborta por espacio | Falta expandir el sistema de ficheros (C4) |
+| `FALTA picamera2 visible` | El venv se creó sin `--system-site-packages`. Borra `/opt/wally/.venv` y repite C8 |
+| `FALTA cámara detectada` | Cable CSI mal asentado, o la Pi estaba encendida al conectarlo |
+| `FALTA NetworkManager activo` | Imagen antigua actualizada que sigue con dhcpcd. Cámbialo en C4 |
+| pip tarda muchísimo | Está compilando en vez de usar wheels. Confirma que el sistema es **64-bit**: `uname -m` debe decir `aarch64` |
+| `wally-face` no arranca | El usuario `wally` debe estar en los grupos `video` y `render`. `setup.sh` lo hace; comprueba con `groups wally` |
+| Todo instalado pero nada responde | `journalctl -u wally-web -n 50 --no-pager` |
 
 ---
 
@@ -503,12 +675,15 @@ mosquitto_pub -t wally/cmd/mode -m '{"mode":"idle"}'
 # En tu equipo
 cd ui && npm run build && cd ..
 rsync -av --exclude .venv --exclude node_modules --exclude .git \
-    ./ wally@wally.local:~/wally/
+    ./ claudio@wally.local:~/wally/
 
 # En la Pi
 sudo bash ~/wally/deploy/setup.sh
-sudo systemctl restart wally-motion wally-vision wally-web wally-net
+sudo systemctl restart 'wally-*'
 ```
+
+`setup.sh` es idempotente: en una reinstalación se salta lo que ya está y sólo
+sincroniza el código, así que tarda segundos en vez de minutos.
 
 ## Diagnóstico
 

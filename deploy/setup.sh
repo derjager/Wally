@@ -16,12 +16,35 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-echo "==> Paquetes del sistema"
+# --- comprobaciones previas -------------------------------------------------
+
+if ! grep -qi "raspbian\|debian" /etc/os-release 2>/dev/null; then
+    echo "AVISO: esto está pensado para Raspberry Pi OS Bookworm." >&2
+fi
+
+libres_mb=$(df -Pm / | awk 'NR==2 {print $4}')
+if (( libres_mb < 1200 )); then
+    echo "Quedan ${libres_mb} MB libres en /. Hacen falta ~1.2 GB." >&2
+    echo "Amplía la partición con: sudo raspi-config -> Advanced -> Expand Filesystem" >&2
+    exit 1
+fi
+
+if ! ping -c1 -W3 deb.debian.org >/dev/null 2>&1; then
+    echo "Sin conexión a internet: la instalación necesita descargar paquetes." >&2
+    exit 1
+fi
+
+echo "==> Paquetes del sistema (esto tarda varios minutos)"
 apt-get update -qq
-apt-get install -y -qq python3-venv python3-dev pigpio mosquitto mosquitto-clients \
-    avahi-daemon rsync alsa-utils libsdl2-2.0-0 libsdl2-ttf-2.0-0
+apt-get install -y -qq \
+    python3-venv python3-dev python3-pip \
+    pigpio mosquitto mosquitto-clients avahi-daemon rsync \
+    alsa-utils \
+    libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0 libsdl2-ttf-2.0-0
+
 # picamera2 se instala por apt, no por pip: depende de libcamera compilado
-# contra el sistema y pip no puede construirlo.
+# contra el sistema y pip no puede construirlo. En Raspberry Pi OS Lite no
+# viene preinstalado, a diferencia de la imagen con escritorio.
 apt-get install -y -qq python3-picamera2 --no-install-recommends
 
 echo "==> pigpiod y mosquitto"
@@ -82,6 +105,32 @@ echo "==> Servicios systemd"
 cp "$INSTALL_DIR"/deploy/systemd/*.service /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable wally-motion wally-vision wally-web wally-net wally-face wally-voice wally-brain
+
+# --- comprobación final -----------------------------------------------------
+
+echo
+echo "==> Comprobación"
+VENV_PY="$INSTALL_DIR/.venv/bin/python"
+
+check() {
+    local etiqueta="$1"; shift
+    if "$@" >/dev/null 2>&1; then
+        echo "    OK    $etiqueta"
+    else
+        echo "    FALTA $etiqueta"
+    fi
+}
+
+check "pigpiod corriendo"      systemctl is-active --quiet pigpiod
+check "mosquitto corriendo"    systemctl is-active --quiet mosquitto
+check "NetworkManager activo"  systemctl is-active --quiet NetworkManager
+check "paquetes de Python"     "$VENV_PY" -c "import paho.mqtt, fastapi, uvicorn, PIL, numpy, pygame"
+check "picamera2 visible"      "$VENV_PY" -c "import picamera2"
+check "pigpio (GPIO)"          "$VENV_PY" -c "import pigpio"
+check "cámara detectada"       bash -c "libcamera-hello --list-cameras 2>/dev/null | grep -qi ov5647"
+check "interfaz web compilada" test -f "$INSTALL_DIR/ui/dist/index.html"
+check "modelo de detección"    test -f "$INSTALL_DIR/models/efficientdet_lite0.tflite"
+check "voz instalada"          bash -c "ls $INSTALL_DIR/assets/voices/*.onnx >/dev/null 2>&1"
 
 cat <<'EOF'
 
