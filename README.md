@@ -343,17 +343,26 @@ bash deploy/install_model.sh
 Descarga EfficientDet-Lite0 (COCO, incluye la clase `cat`) e instala
 `tflite-runtime`.
 
-### C10. Configurar la pantalla táctil de 3.2"
+### C10. Configurar la pantalla táctil de 3.2" (MPI3201)
 
 > Este es el paso con más fricción de toda la instalación. Presupuesta una
 > sesión entera si la pantalla no arranca a la primera — la razón cambió
 > respecto a versiones anteriores de esta guía (antes eran los timings HDMI;
-> ahora es encontrar el overlay/driver correcto para el panel SPI), pero la
-> fricción sigue ahí.
+> ahora es el instalador de terceros del panel SPI), pero la fricción sigue
+> ahí.
 
-La pantalla se monta **directo sobre el header de 40 pines** — no hay cable
-de vídeo que conectar. Con la Pi apagada, encájala con cuidado de alinear el
+La pantalla (modelo **MPI3201**, controlador ILI9341, táctil resistivo
+XPT2046) se monta **directo sobre el header de 40 pines** — no hay cable de
+vídeo que conectar. Con la Pi apagada, encájala con cuidado de alinear el
 pin 1 (revisa la serigrafía de ambas placas antes de hacer fuerza).
+
+> ⚠️ La placa de la pantalla mide casi lo mismo que la propia Pi, así que una
+> vez montada su cuerpo queda por encima de los 40 pines del header, no solo
+> de los 8 que usa eléctricamente. Para cablear el resto (motores, servos,
+> sensores — PLAN.md §4.5) sin pelear con la pantalla por encima, conviene un
+> **cable de extensión GPIO (ribbon/breakout de 40 pines)**: la pantalla se
+> conecta a ese breakout en vez de directo a la Pi, y ahí queda accesible
+> todo lo demás.
 
 **Habilita SPI:**
 
@@ -363,30 +372,35 @@ sudo raspi-config nonint do_spi 0
 
 (o `Interface Options → SPI` desde el menú, ver C4). Reinicia.
 
-**Instala el overlay/driver del panel.** El pinout y el nombre exacto del
-overlay dependen del fabricante — PLAN.md §3 documenta el pinout típico de
-esta familia (ILI9341 + táctil XPT2046 por SPI0) como estimación de partida,
-pero **hay que confirmarlo con la ficha o la web del vendedor**. Muchos
-clones de esta gama todavía dependen de un script/overlay propio (tipo
-`LCD-show`) en vez de uno incluido en Raspberry Pi OS. Tras instalarlo,
-confirma que aparece el framebuffer del panel:
+**Instala el driver** con el instalador oficial del fabricante (LCDWIKI),
+que además configura el táctil en el mismo paso:
 
 ```bash
-ls /dev/fb*        # debería aparecer /dev/fb1 además de /dev/fb0
+git clone https://github.com/goodtft/LCD-show.git
+chmod -R 755 LCD-show
+cd LCD-show
+sudo ./LCD32-show
 ```
 
-Si el nombre del device o el driver SDL terminan siendo distintos a
-`/dev/fb1`/`fbcon`, ajusta `fb_device`/`sdl_video_driver` en
-`config/wally.toml` — no hace falta tocar código, son campos de config
-(`common/config.py`, `FaceConfig`).
+Reinicia solo cuando el script lo pida. Confirma que aparece el framebuffer
+del panel:
+
+```bash
+ls /dev/fb*
+```
+
+`LCD32-show` suele remapear la consola a `/dev/fb0` (no crea un `/dev/fb1`
+aparte) — es el default que ya trae `config/wally.toml`. Si en tu instalación
+aparece distinto, ajusta `fb_device` ahí (no hace falta tocar código,
+`common/config.py` → `FaceConfig`).
 
 **El táctil sí se conecta** — a diferencia de la pantalla HDMI anterior, aquí
 no hay forma de evitarlo (el conector es el mismo header). `wally-face` ya
 reconoce dos gestos sin necesidad de calibrar coordenadas (PLAN.md §8):
 toque corto para ciclar de modo, toque largo (3 s) para forzar el hotspot de
-red. Si el táctil no responde, revisa que el overlay instalado incluya
-también el controlador táctil (no solo el de vídeo) — son chips separados
-aunque compartan el mismo bus SPI.
+red. Si el táctil no responde, vuelve a correr `LCD32-show`: instala vídeo y
+táctil juntos, así que si uno de los dos falla suele ser un problema de la
+instalación completa, no de un driver aparte.
 
 Si al arrancar la cara ves el cursor de la consola parpadeando por detrás:
 

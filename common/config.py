@@ -38,11 +38,12 @@ class MotionConfig:
     # --- Pines (BCM), según PLAN.md §4.5 ---
     left: MotorPins = field(default_factory=lambda: MotorPins(pwm=12, in1=20, in2=21))
     right: MotorPins = field(default_factory=lambda: MotorPins(pwm=13, in1=16, in2=26))
-    # GPIO25/18/17 se los quedó la pantalla SPI (ver PLAN.md §3): STBY y el
-    # servo izquierdo se movieron a los pines que antes eran UART de
-    # depuración, y el ECHO frontal al que quedaba libre junto a ellos.
+    # GPIO25/17 se los quedó la pantalla SPI MPI3201 (RST y touch IRQ, ver
+    # PLAN.md §3, pinout confirmado por el datasheet de LCDWIKI): STBY se
+    # movió a GPIO19 y el ECHO frontal a GPIO15 (antes UART de depuración).
+    # GPIO18 sigue libre: esta pantalla no usa GPIO para el backlight.
     standby: int = 19
-    servo_left: int = 14
+    servo_left: int = 18
     servo_right: int = 23
     rangefinders: tuple[RangeSensorPins, ...] = field(
         default_factory=lambda: (
@@ -142,13 +143,14 @@ class FaceConfig:
     sleepy_after_s: float = 90.0
 
     # --- Pantalla física (SPI, no HDMI/DRM) ---
-    # El overlay de estos clones de 3.2" suele exponer un framebuffer clásico
-    # en vez de un dispositivo DRM/KMS, así que `_init_display` no puede usar
-    # kmsdrm a secas. Configurable porque el driver real depende del overlay
-    # que termine instalado (ver README C10) — pendiente de confirmar con la
-    # pantalla en mano.
+    # MPI3201 (ILI9341), instalada con goodtft/LCD-show (`sudo ./LCD32-show`,
+    # ver README C10). Ese instalador expone un framebuffer clásico, no un
+    # dispositivo DRM/KMS, así que `_init_display` no puede usar kmsdrm a
+    # secas. LCD-show suele remapear la consola al framebuffer nuevo como
+    # /dev/fb0 (no /dev/fb1) — confirmar con `ls /dev/fb*` tras instalar y
+    # ajustar aquí si el device real es otro.
     sdl_video_driver: str = "fbcon"
-    fb_device: str = "/dev/fb1"
+    fb_device: str = "/dev/fb0"
 
     # --- Gestos táctiles ---
     # No requieren calibración de coordenadas: solo miden cuánto duró el

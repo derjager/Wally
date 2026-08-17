@@ -26,7 +26,7 @@ Documentos: [PLAN.md](PLAN.md) es el diseño (hardware, energía, conexionado);
 | Tracción | Chasis Tamiya 70108 + gearbox de 2 motores **FA-130 (3V nominales)** |
 | Driver | SparkFun TB6612FNG dual |
 | Cámara | OV5647 con LEDs IR |
-| Pantalla | **3.2" SPI táctil, 320×240**, montada directo sobre el header de 40 pines. Táctil conectado y usado (gestos toque-corto/toque-largo) |
+| Pantalla | **MPI3201, 3.2" SPI táctil, 320×240** (ILI9341 + táctil XPT2046), montada directo sobre el header de 40 pines. Táctil conectado y usado (gestos toque-corto/toque-largo) |
 | Brazos | 2 servos |
 | Sensores | 3× HC-SR04 (frontal + dos diagonales a 35°). Había un 4º de repuesto, retirado: sus pines pasaron a la pantalla SPI |
 | Batería | LiPo 2S 7.4V 5500 mAh 35C |
@@ -51,12 +51,17 @@ fusible 10 A, condensadores, resistencias para los divisores.
   ya no GPIO24 nativo — ver más abajo), automáticos con LDR, o siempre
   encendidos.
 - Que el BEC sea switching y dé ≥3 A (un lineal o de 1–2 A no sirve para la Pi 4).
-- **Pinout real de la pantalla SPI** (DC/RST/IRQ/backlight): PLAN.md §3 asume
-  el pinout típico de estos clones de 3.2" (ILI9341 + táctil XPT2046), no un
-  dato confirmado. De esto depende si la reasignación de `STBY`/servo
-  izquierdo/`ECHO` frontal (GPIO25→19, 18→14, 17→15) es correcta.
-- Overlay/driver que reconoce Bookworm para el panel concreto que llegue —
-  muchos clones de esta familia dependen de un script/overlay del fabricante.
+- Pinout de la pantalla SPI (DC=GPIO24, RST=GPIO25, IRQ táctil=GPIO17,
+  SPI0=GPIO7/8/9/10/11, sin GPIO de backlight) **ya confirmado** por el
+  datasheet oficial de LCDWIKI (SKU MPI3201) — no es una estimación. Reasignó
+  `STBY` (25→19) y el `ECHO` frontal (17→15); el servo izquierdo se quedó en
+  GPIO18, esa pantalla no lo usa.
+- Instalador confirmado: `goodtft/LCD-show`, `sudo ./LCD32-show` (README
+  C10). Falta confirmar si el framebuffer resultante es `/dev/fb0` (default
+  actual) o `/dev/fb1`.
+- La placa de la pantalla es casi del tamaño de la Pi: al montarse cubre
+  mecánicamente los 40 pines del header, no solo los 8 que usa. Conviene un
+  cable de extensión GPIO para cablear el resto sin pelear con ella encima.
 
 ## 3. Decisiones cerradas — no re-litigar
 

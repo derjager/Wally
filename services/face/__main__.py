@@ -35,9 +35,8 @@ from services.face.state import FaceState, Inputs
 def _init_display(cfg, windowed: bool):
     """Arranca pygame y devuelve (pantalla, lienzo)."""
     if not windowed:
-        # Pantalla SPI: framebuffer clásico (fbtft o similar), no un
-        # dispositivo DRM/KMS. El driver y el device exactos dependen del
-        # overlay instalado — ver README C10.
+        # Pantalla SPI (MPI3201, instalada con goodtft/LCD-show): framebuffer
+        # clásico, no un dispositivo DRM/KMS. Ver README C10.
         os.environ.setdefault("SDL_VIDEODRIVER", cfg.sdl_video_driver)
         os.environ.setdefault("SDL_FBDEV", cfg.fb_device)
 
