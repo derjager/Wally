@@ -9,8 +9,9 @@ host = "localhost"
 port = 1883
 
 [motion]
-standby = 25
-servo_left = 18
+# GPIO25/18/17 se los quedó la pantalla SPI de 3.2" (ver PLAN.md §3).
+standby = 19
+servo_left = 14
 servo_right = 23
 
 # Seguridad. No subir duty_cap sin releer PLAN.md §2: los motores FA-130 son
@@ -40,7 +41,7 @@ invert = false
 [[motion.rangefinders]]
 name = "front"
 trig = 4
-echo = 17
+echo = 15
 
 [[motion.rangefinders]]
 name = "left"
@@ -116,15 +117,26 @@ cat_greeting = "¡Hola, gatita!"
 
 [face]
 # Lienzo del pixel art. Se escala por el mayor factor entero que quepa en la
-# pantalla: con 480x320 sale x3. Subirlo pierde el aspecto de píxel gordo.
+# pantalla: con 320x240 (3.2" SPI) sale x2 exacto, sin franjas negras.
 logical_width = 160
-logical_height = 106
+logical_height = 120
 fps = 30
-window_scale = 3
+window_scale = 2
 blink_every_s = 4.0
 blink_jitter_s = 2.5
 # Sin actividad durante este tiempo, la cara se adormece.
 sleepy_after_s = 90.0
+
+# Framebuffer SPI, no HDMI/DRM. El driver real depende del overlay que
+# termine instalado (ver README C10) — pendiente de confirmar con la
+# pantalla en mano.
+sdl_video_driver = "fbcon"
+fb_device = "/dev/fb1"
+
+# Gestos táctiles: no requieren calibración de coordenadas, solo miden
+# cuánto duró el toque.
+touch_tap_max_s = 0.6
+touch_hold_s = 3.0
 
 [voice]
 model = "assets/voices/es_ES-davefx-medium.onnx"

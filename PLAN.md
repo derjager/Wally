@@ -12,10 +12,10 @@ Robot con orugas, visión, cara expresiva y control web sobre Raspberry Pi 4.
 | Tracción | Chasis Tamiya 70108 + gearbox de 2 motores | Motores FA-130: **3V nominales**, rango 1.5–3V |
 | Driver motores | SparkFun TB6612FNG (dual) | 1.2 A continuos / 3.2 A pico por canal |
 | Cámara | OV5647 con módulo IR | Vía CSI. Stack libcamera / Picamera2 |
-| Pantalla | **3.5" HDMI, 480×320** | Vía micro-HDMI. **Táctil sin conectar** (ver §7) |
+| Pantalla | **3.2" SPI táctil, 320×240** | Se monta directo sobre el header de 40 pines. **Táctil conectado** (ver §7) |
 | Brazos | 2 × servo | PWM 50 Hz vía pigpio, a 4.8V |
 | Audio | Jack 3.5 mm de la Pi | Solo salida (sin micrófono en v1) |
-| Sensores | **4 × HC-SR04** (se usan 3) | ECHO a 5V: divisor resistivo obligatorio |
+| Sensores | **3 × HC-SR04** | ECHO a 5V: divisor resistivo obligatorio. Había un 4º de repuesto, pero sus pines (GPIO9/11) se los quedó la pantalla SPI (§3) |
 | Energía | **LiPo 2S 7.4V 5500mAh 35C** | 8.4V cargada, corte a 6.6V. Ver §2 |
 
 ---
@@ -79,38 +79,56 @@ Monitorización de batería: la Pi no tiene ADC. Con un **ADS1115** por I2C (GPI
 
 ## 3. Mapa de pines (BCM)
 
-La pantalla es HDMI y **el táctil no se conecta**, así que no consume ni un GPIO.
+La pantalla nueva es SPI y se monta **directo sobre el header de 40 pines**,
+así que ocupa esos GPIO **se use el táctil o no** — a diferencia de la HDMI
+original, aquí no hay forma de evitarlo. Esto obligó a mover 3 funciones que
+chocaban con el pinout típico de estas pantallas.
+
+> ⚠️ **Pinout no confirmado.** El bloque de abajo asume el pinout habitual de
+> estos clones de 3.2" (controlador ILI9341 + táctil XPT2046, ambos por
+> SPI0): es la misma estimación de 7 pines, incluidos GPIO24 y 25, que ya
+> aparecía en una versión anterior de este documento. **Verificar con la
+> pantalla en mano antes de soldar/cablear nada** (§10).
 
 ```
+PANTALLA SPI 3.2" (asumido — ver aviso arriba)
+  SPI0   SCLK → GPIO11   MOSI → GPIO10   MISO → GPIO9
+         LCD_CS  → GPIO8 (CE0)      TOUCH_CS → GPIO7 (CE1)
+  LCD    DC → GPIO24        RST → GPIO25
+  TOUCH  IRQ → GPIO17
+  BL     GPIO18 (algunos modelos lo atan directo a 3V3, sin GPIO)
+
 RESERVADO
   GPIO2  SDA  ─ I2C: ADS1115 (batería) y futuros sensores ToF
   GPIO3  SCL  ─ ídem
-  GPIO14/15   ─ UART (depuración)
   GPIO0/1     ─ EEPROM HAT (no usar)
 
 TB6612FNG
   PWMA → GPIO12       AIN1 → GPIO20       AIN2 → GPIO21
   PWMB → GPIO13       BIN1 → GPIO16       BIN2 → GPIO26
-  STBY → GPIO25
+  STBY → GPIO19        (antes GPIO25 — se lo quedó RST de la pantalla)
   VCC  → 3.3V (lógica)        VM → riel de potencia (4.8V)
 
 SERVOS (pigpio, 50 Hz) — alimentados del riel de potencia a 4.8V
-  Brazo izquierdo  → GPIO18
+  Brazo izquierdo  → GPIO14   (antes GPIO18 — se lo quedó el backlight)
   Brazo derecho    → GPIO23
 
 HC-SR04 ×3  (VCC a 5V; cada ECHO vía divisor 1kΩ+2kΩ)
-  Frontal          TRIG → GPIO4    ECHO → GPIO17
+  Frontal          TRIG → GPIO4    ECHO → GPIO15   (antes GPIO17 — IRQ táctil)
   Diagonal izq 35° TRIG → GPIO5    ECHO → GPIO27
   Diagonal der 35° TRIG → GPIO6    ECHO → GPIO22
-  (4º de repuesto  TRIG → GPIO9    ECHO → GPIO11)
+  (4º de repuesto: retirado del mapa — sus pines, GPIO9/11, pasaron a SPI0)
 
-CÁMARA IR
-  LEDs IR → GPIO24 vía transistor NPN (2N2222 + 1kΩ base)
-            NO conectar directo: superan los 16 mA por pin
-            Solo si el módulo resulta ser conmutable (ver §9)
+CÁMARA IR (opcional, ver §10)
+  LEDs IR → expansor GPIO por I2C (MCP23017 o similar), no GPIO24 nativo:
+            ese pin se lo quedó el DC de la pantalla. Es una señal digital
+            lenta (habilita/deshabilita un transistor), así que un expansor
+            I2C es viable aquí — a diferencia de STBY, los servos o los ECHO,
+            que si no van por GPIO nativo pierden precisión de temporización.
+            NO conectar los LEDs directo a un GPIO/expansor: superan los
+            16 mA por pin, sigue haciendo falta el 2N2222 (§4.4).
 
-LIBRES
-  GPIO7, GPIO8, GPIO10, GPIO19
+GPIO14/15 (antes UART de depuración) → reasignados arriba (servo izq., ECHO)
 ```
 
 > ⚠️ **HC-SR04: el pin ECHO emite 5V** contra un GPIO de 3.3V. Requiere divisor resistivo (1 kΩ + 2 kΩ) en cada ECHO, sin excepción. Es la causa más común de Raspberry Pis dañadas en robótica.
@@ -149,13 +167,15 @@ LIBRES
           │                  │          │
           │                  ├──→ TB6612  VM        │
           ├──→ Pi 4  (5V)    ├──→ Servo izq (rojo)  │
-          ├──→ Pantalla HDMI ├──→ Servo der (rojo)  │
-          └──→ HC-SR04 VCC   │                      │
+          └──→ HC-SR04 VCC   ├──→ Servo der (rojo)  │
                              │                      │
    ══════════════════ MASA COMÚN ═══════════════════┘
    LiPo− · BEC− · XL4015− · Pi GND · TB6612 GND ·
    servos GND · HC-SR04 GND  →  todos unidos
 ```
+
+La pantalla ya no aparece como rama aparte: al montarse sobre el header toma
+3.3V/5V de ahí mismo, no de un cable propio.
 
 > **La masa común no es opcional.** Sin ella las señales lógicas del TB6612 y los ECHO de los ultrasónicos flotan y el comportamiento se vuelve errático e irreproducible.
 
@@ -169,7 +189,7 @@ LIBRES
    │ VM   ← 4.8V (XL4015) │
    │ VCC  ← 3.3V (Pi p.1) │
    │ GND  ← masa común    │
-   │ STBY ← GPIO25 (p.22) │
+   │ STBY ← GPIO19 (p.35) │
    │                      │
    │ PWMA ← GPIO12 (p.32) │      AO1 ──→ ┐ Motor
    │ AIN1 ← GPIO20 (p.38) │      AO2 ──→ ┘ IZQUIERDO
@@ -199,19 +219,24 @@ Uno por sensor: **tres divisores en total**. El TRIG sí se conecta directo (la 
 
 ### 4.4 LEDs IR — solo si resultan conmutables
 
+GPIO24 se lo quedó el `DC` de la pantalla (§3), así que la base del 2N2222 va
+por un canal del expansor I2C en vez de un GPIO nativo — la señal es
+digital lenta (habilita/deshabilita el transistor), así que el expansor no
+introduce ningún problema de temporización aquí.
+
 ```
               +5V
                │
           [LEDs IR]
                │
                C
-   GPIO24 ─[1kΩ]─ B    2N2222
-               E
+  EXPANSOR ─[1kΩ]─ B    2N2222
+   (I2C)         E
                │
               GND
 ```
 
-Nunca conectar los LEDs directo a un GPIO: superan los 16 mA que tolera el pin.
+Nunca conectar los LEDs directo a un GPIO/expansor: superan los 16 mA que tolera el pin.
 
 ### 4.5 Tabla de conexión punto a punto
 
@@ -224,19 +249,23 @@ Nunca conectar los LEDs directo a un GPIO: superan los 16 mA que tolera el pin.
 | Pi | GPIO13 | 33 | TB6612 `PWMB` |
 | Pi | GPIO16 | 36 | TB6612 `BIN1` |
 | Pi | GPIO26 | 37 | TB6612 `BIN2` |
-| Pi | GPIO25 | 22 | TB6612 `STBY` |
-| Pi | GPIO18 | 12 | Servo izquierdo (señal) |
+| Pi | GPIO19 | 35 | TB6612 `STBY` |
+| Pi | GPIO14 | 8 | Servo izquierdo (señal) |
 | Pi | GPIO23 | 16 | Servo derecho (señal) |
 | Pi | GPIO4 | 7 | HC-SR04 frontal `TRIG` |
-| Pi | GPIO17 | 11 | HC-SR04 frontal `ECHO` **vía divisor** |
+| Pi | GPIO15 | 10 | HC-SR04 frontal `ECHO` **vía divisor** |
 | Pi | GPIO5 | 29 | HC-SR04 izquierdo `TRIG` |
 | Pi | GPIO27 | 13 | HC-SR04 izquierdo `ECHO` **vía divisor** |
 | Pi | GPIO6 | 31 | HC-SR04 derecho `TRIG` |
 | Pi | GPIO22 | 15 | HC-SR04 derecho `ECHO` **vía divisor** |
-| Pi | GPIO24 | 18 | Base del 2N2222 (LEDs IR) vía 1kΩ |
+| Pi | Expansor I2C | — | Base del 2N2222 (LEDs IR) vía 1kΩ |
 | Pi | GND | 6, 9, 14, 20, 25, 30, 34, 39 | Masa común |
 
-Conexiones que no pasan por el header: cámara OV5647 por cable plano al puerto **CSI/CAMERA**, pantalla por **micro-HDMI**, audio por el **jack de 3.5 mm**.
+Además de lo anterior, todo el bloque SPI0/DC/RST/IRQ/BL de §3 (GPIO7–11,
+17, 18, 24, 25) queda ocupado por la pantalla, que se monta directo sobre el
+header de 40 pines — a diferencia de la HDMI original, ya **no** es una
+conexión aparte. Solo la cámara OV5647 (cable plano al puerto **CSI/CAMERA**)
+y el audio (**jack de 3.5 mm**) siguen sin pasar por el header.
 
 ### 4.6 Orden de encendido para las primeras pruebas
 
@@ -334,13 +363,16 @@ wally/
 
 ## 8. La cara: pixel art retro
 
-Pantalla **3.5" HDMI a 480×320**, conectada por micro-HDMI (hace falta adaptador micro-HDMI → HDMI; la Pi 4 no trae HDMI de tamaño completo).
+Pantalla **3.2" SPI táctil a 320×240**, montada directo sobre el header de 40 pines (sin adaptador ni cable de vídeo aparte).
 
-La baja resolución juega a favor: **renderizo a 160×107 y escalo ×3 con nearest-neighbor**. Píxeles nítidos y cuadrados, coste de CPU casi nulo.
+La baja resolución juega a favor: **renderizo a 160×120 y escalo ×2 con nearest-neighbor**, factor exacto para llenar el panel sin franjas negras (antes era 160×106 ×3 sobre los 480×320 de la HDMI, de aspecto distinto). Píxeles nítidos y cuadrados, coste de CPU casi nulo.
 
-**El táctil no se conecta.** Estas pantallas suelen usar táctil resistivo por SPI/GPIO (consumiría 7 pines, incluidos GPIO24 y 25 que ya están asignados). La cara es solo salida visual y todo el control va por la webapp, así que conectarlo no aporta nada.
+**El táctil sí se conecta**, y con eso cambia la razón de ser de la sección anterior: ya no hay forma de "ahorrarse" esos GPIO montando la pantalla — se pierden se use el táctil o no, así que aprovecharlo no cuesta pines extra. Se usan dos gestos que **no requieren calibrar coordenadas** (solo miden cuánto duró el contacto, no dónde):
 
-> **Fricción esperada:** estas pantallas requieren timings HDMI personalizados. En Bookworm el driver KMS cambió la forma de configurarlos respecto a los tutoriales antiguos, que usan `hdmi_cvt` en `config.txt` con el driver legacy. Presupuestar una sesión completa para dejarla operativa.
+- **Toque corto** (<0.6 s): cicla el modo `idle → patrol → follow_cat`, publicando `wally/cmd/mode` (lo mismo que ya consume `wally-brain`).
+- **Toque largo** (≥3 s): fuerza el hotspot de red (`wally/cmd/net/hotspot`) — es el botón físico para volver al modo AP que quedaba pendiente en §9.
+
+> **Fricción esperada:** el driver de estas pantallas SPI suele depender de un overlay/kernel específico del fabricante (fuera del árbol mainline en muchos clones), no de un ajuste de `config.txt` como la HDMI. Presupuestar una sesión completa para dejarla operativa, y confirmar el nombre exacto del overlay con la pantalla en mano (§10).
 
 Estados de ánimo con sprites animados:
 
@@ -377,7 +409,7 @@ Al arrancar, `wally-net` comprueba si hay un perfil wifi conocido:
 - **Sí** → conecta como cliente. Accesible en `http://wally.local` (mDNS vía Avahi).
 - **No, o falla tras 30 s** → levanta AP `Wally-Setup` con `nmcli`. El usuario se conecta, entra a `http://192.168.4.1`, elige red e introduce contraseña. El servicio guarda el perfil y reinicia en modo cliente.
 
-Botón físico o comando web para forzar el retorno al modo AP si cambias de router.
+Comando web para forzar el retorno al modo AP si cambias de router, más el toque largo (≥3 s) en la pantalla como botón físico equivalente (§8) — ambos publican `wally/cmd/net/hotspot`.
 
 ---
 
@@ -387,14 +419,22 @@ Botón físico o comando web para forzar el retorno al modo AP si cambias de rou
 
 **Verificar en el hardware que ya tienes:**
 
-1. **Adaptador micro-HDMI → HDMI** para la pantalla.
-2. **Resolución nativa real** de la pantalla 3.5" (asumido 480×320).
-3. **LEDs IR de la cámara** — determinar la variante:
-   - ¿Salen cables sueltos además del plano CSI? → alimentación separada, **controlables por GPIO**.
+1. **Pinout real de la pantalla** (SPI0/DC/RST/IRQ/BL): el mapa de §3 es una
+   estimación basada en el tipo de módulo más común para esta ficha (3.2",
+   320×240, táctil resistivo, montaje directo sobre el header), no un dato
+   confirmado. Revisar la serigrafía de la placa o la documentación del
+   fabricante antes de cablear nada.
+2. **Overlay/driver** que reconoce el kernel de Bookworm para este panel
+   concreto — muchos clones de esta familia siguen dependiendo de un
+   overlay/script del fabricante en vez de uno incluido en Raspberry Pi OS.
+3. Si el backlight sale por GPIO18 o va atado directo a 3V3 (afecta si ese
+   pin queda realmente libre).
+4. **LEDs IR de la cámara** — determinar la variante:
+   - ¿Salen cables sueltos además del plano CSI? → alimentación separada, **controlables por GPIO** (vía expansor I2C, ver §3/§4.4).
    - ¿Hay una píldora transparente en la placa (LDR)? → automáticos por luz ambiente, sin control por software.
    - Prueba: enciende la cámara a oscuras y mira los LEDs con la cámara de un móvil (el IR se ve como violeta tenue).
 
-Si los IR resultan no conmutables, se elimina GPIO24 del mapa y la cara nocturna pierde el control de iluminación — sin impacto en el resto del plan.
+Si los IR resultan no conmutables, se elimina esa fila del mapa y la cara nocturna pierde el control de iluminación — sin impacto en el resto del plan. Si resultan conmutables, hace falta el expansor GPIO por I2C (MCP23017 o similar) mencionado en §3 — ya disponible.
 
 ### Mejora opcional de sensores
 
@@ -415,6 +455,7 @@ Escalones superiores si el proyecto crece: **TF-Luna** (LiDAR 8m, solo frontal, 
 | Crosstalk entre ultrasónicos | Disparo secuencial round-robin, nunca simultáneo |
 | **Atropellar a la gata** (el ultrasonido no la detecta) | Detección solo por cámara; velocidad reducida en modo `follow_cat` |
 | Visión satura la CPU y ahoga el control | Procesos separados + `nice` favorable a `wally-motion` |
-| Timings HDMI de la pantalla rotos tras actualizar kernel | Documentar la configuración KMS y respaldar `config.txt` |
+| Pinout de la pantalla SPI distinto al asumido (§3), reasignación de `STBY`/servo/`ECHO` incorrecta | Verificar con la pantalla en mano antes de cablear (§10); el código lee los pines de `wally.toml`, así que corregirlo es un cambio de config, no de código |
+| Driver/overlay de la pantalla SPI no incluido en Bookworm | Documentar el overlay real una vez identificado; presupuestar una sesión, igual que antes con los timings HDMI |
 | Robot descontrolado por pérdida de red | Dead-man switch de 500 ms desde la Fase 1 |
 | Corrupción de SD por cortes de energía | `fsck` en arranque; considerar overlay de solo lectura en producción |

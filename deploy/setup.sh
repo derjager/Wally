@@ -38,7 +38,7 @@ echo "==> Paquetes del sistema (esto tarda varios minutos)"
 apt-get update -qq
 apt-get install -y -qq \
     python3-venv python3-dev python3-pip \
-    pigpio mosquitto mosquitto-clients avahi-daemon rsync \
+    mosquitto mosquitto-clients avahi-daemon rsync \
     alsa-utils \
     libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0 libsdl2-ttf-2.0-0
 
@@ -55,8 +55,9 @@ echo "==> Usuario de servicio"
 if ! id -u "$SERVICE_USER" >/dev/null 2>&1; then
     useradd --system --create-home --shell /usr/sbin/nologin "$SERVICE_USER"
 fi
-# gpio: pines. video/render: cámara y framebuffer (la cara dibuja por KMSDRM
-# sin escritorio). audio: salida de voz.
+# gpio: pines. video/render: cámara y framebuffer (la cara dibuja al
+# framebuffer de la pantalla SPI, sin escritorio). input: eventos del táctil.
+# audio: salida de voz.
 usermod -aG gpio,video,render,audio,input "$SERVICE_USER"
 
 echo "==> Código en $INSTALL_DIR"
@@ -101,6 +102,12 @@ if ! systemctl is-enabled NetworkManager >/dev/null 2>&1; then
     echo "    el hotspot. Actívalo con: sudo raspi-config -> Advanced -> Network Config"
 fi
 
+echo "==> SPI (pantalla táctil)"
+if [[ ! -e /dev/spidev0.0 ]]; then
+    echo "    AVISO: SPI no está habilitado. La pantalla no arrancará."
+    echo "    Actívalo con: sudo raspi-config nonint do_spi 0 (ver README C10)"
+fi
+
 echo "==> Servicios systemd"
 cp "$INSTALL_DIR"/deploy/systemd/*.service /etc/systemd/system/
 systemctl daemon-reload
@@ -124,6 +131,7 @@ check() {
 check "pigpiod corriendo"      systemctl is-active --quiet pigpiod
 check "mosquitto corriendo"    systemctl is-active --quiet mosquitto
 check "NetworkManager activo"  systemctl is-active --quiet NetworkManager
+check "SPI habilitado"         test -e /dev/spidev0.0
 check "paquetes de Python"     "$VENV_PY" -c "import paho.mqtt, fastapi, uvicorn, PIL, numpy, pygame"
 check "picamera2 visible"      "$VENV_PY" -c "import picamera2"
 check "pigpio (GPIO)"          "$VENV_PY" -c "import pigpio"

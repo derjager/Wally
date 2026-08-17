@@ -26,9 +26,9 @@ Documentos: [PLAN.md](PLAN.md) es el diseño (hardware, energía, conexionado);
 | Tracción | Chasis Tamiya 70108 + gearbox de 2 motores **FA-130 (3V nominales)** |
 | Driver | SparkFun TB6612FNG dual |
 | Cámara | OV5647 con LEDs IR |
-| Pantalla | **3.5" HDMI, 480×320**, por micro-HDMI. Táctil sin conectar |
+| Pantalla | **3.2" SPI táctil, 320×240**, montada directo sobre el header de 40 pines. Táctil conectado y usado (gestos toque-corto/toque-largo) |
 | Brazos | 2 servos |
-| Sensores | 4× HC-SR04 (se usan 3: frontal + dos diagonales a 35°) |
+| Sensores | 3× HC-SR04 (frontal + dos diagonales a 35°). Había un 4º de repuesto, retirado: sus pines pasaron a la pantalla SPI |
 | Batería | LiPo 2S 7.4V 5500 mAh 35C |
 | Audio | Jack 3.5 mm. Solo salida, **no hay micrófono** |
 
@@ -47,11 +47,16 @@ fusible 10 A, condensadores, resistencias para los divisores.
 
 ### Pendiente de verificar en el hardware físico
 
-- Si los LEDs IR de la cámara son conmutables por GPIO, automáticos con LDR, o
-  siempre encendidos. Si no son conmutables, sale GPIO24 del mapa.
+- Si los LEDs IR de la cámara son conmutables por GPIO (vía expansor I2C,
+  ya no GPIO24 nativo — ver más abajo), automáticos con LDR, o siempre
+  encendidos.
 - Que el BEC sea switching y dé ≥3 A (un lineal o de 1–2 A no sirve para la Pi 4).
-- Resolución nativa real de la pantalla (se asumió 480×320).
-- Adaptador micro-HDMI → HDMI.
+- **Pinout real de la pantalla SPI** (DC/RST/IRQ/backlight): PLAN.md §3 asume
+  el pinout típico de estos clones de 3.2" (ILI9341 + táctil XPT2046), no un
+  dato confirmado. De esto depende si la reasignación de `STBY`/servo
+  izquierdo/`ECHO` frontal (GPIO25→19, 18→14, 17→15) es correcta.
+- Overlay/driver que reconoce Bookworm para el panel concreto que llegue —
+  muchos clones de esta familia dependen de un script/overlay del fabricante.
 
 ## 3. Decisiones cerradas — no re-litigar
 
@@ -63,8 +68,9 @@ fusible 10 A, condensadores, resistencias para los divisores.
 | Frontend | React + Vite + TypeScript | Compilado a estáticos que sirve FastAPI |
 | Vídeo | MJPEG sobre HTTP | Simple, ~150 ms. WebRTC quedaría para v2 |
 | TTS | Piper | Neural, offline, español, tiempo real en Pi 4 |
-| Cara | Pygame a framebuffer (KMSDRM), **pixel art** | Render a 160×106 escalado por factor **entero** (×3) |
+| Cara | Pygame a framebuffer SPI (`fbcon`, no KMSDRM), **pixel art** | Render a 160×120 escalado por factor **entero** (×2). Cambió de KMSDRM/HDMI a framebuffer SPI al cambiar de pantalla |
 | Expresiones | Geometría interpolable, **no sprites** | Permite transiciones suaves sin dibujar fotogramas; sin binarios en el repo |
+| Táctil | **Se usa** — toque corto cicla modo, toque largo fuerza hotspot. Sin calibrar coordenadas (solo mide duración) | La pantalla nueva lo trae de fábrica sobre el mismo header: ya no hay forma de ahorrar GPIO evitándolo, así que ignorarlo no aporta nada (al revés que con la HDMI anterior) |
 | pygame | **`pygame-ce`**, no `pygame` | Mismo API; es el fork mantenido y publica wheels para Python nuevo (el original no compila en 3.14) |
 | SO | **Lite**, sin escritorio | La cara dibuja al framebuffer; un entorno gráfico sólo competiría por RAM y CPU con la visión |
 | Red | NetworkManager (`nmcli`) | Nativo en Bookworm, `ipv4.method shared` da DHCP solo |
@@ -261,7 +267,7 @@ Tras cambiar un pin: `python tools/make_wiring_diagram.py`.
 ## 9. Al retomar
 
 1. Leer este archivo y el estado de fases.
-2. `.venv/bin/python -m pytest` — deben pasar 168.
+2. `.venv/bin/python -m pytest` — deben pasar 172.
 
 **No queda software pendiente por escribir. Lo que queda es el robot.** En este
 orden:
@@ -288,9 +294,9 @@ Detalles de **Raspberry Pi OS Lite** que cuestan tiempo si se olvidan:
   se ve desde dentro.
 - No hay servidor de audio: se usa ALSA directo (`aplay`), que es justo lo que
   espera `wally-voice`.
-- La pantalla HDMI necesita `video=HDMI-A-1:480x320M@60` en
-  `/boot/firmware/cmdline.txt`. Los ajustes `hdmi_*` de los tutoriales
-  antiguos sólo funcionan con `vc4-fkms-v3d`, no con el KMS de Bookworm.
+- La pantalla es SPI, no HDMI: hace falta `dtparam=spi=on` (o
+  `raspi-config nonint do_spi 0`) más el overlay/driver del fabricante —
+  pinout y nombre de overlay sin confirmar todavía (README C10, MEMORY.md §2).
 - Si la consola parpadea detrás de la cara: `systemctl disable getty@tty1`.
 
 Preferencia del usuario: planificar mediante preguntas concretas antes de

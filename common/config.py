@@ -38,12 +38,15 @@ class MotionConfig:
     # --- Pines (BCM), según PLAN.md §4.5 ---
     left: MotorPins = field(default_factory=lambda: MotorPins(pwm=12, in1=20, in2=21))
     right: MotorPins = field(default_factory=lambda: MotorPins(pwm=13, in1=16, in2=26))
-    standby: int = 25
-    servo_left: int = 18
+    # GPIO25/18/17 se los quedó la pantalla SPI (ver PLAN.md §3): STBY y el
+    # servo izquierdo se movieron a los pines que antes eran UART de
+    # depuración, y el ECHO frontal al que quedaba libre junto a ellos.
+    standby: int = 19
+    servo_left: int = 14
     servo_right: int = 23
     rangefinders: tuple[RangeSensorPins, ...] = field(
         default_factory=lambda: (
-            RangeSensorPins("front", trig=4, echo=17),
+            RangeSensorPins("front", trig=4, echo=15),
             RangeSensorPins("left", trig=5, echo=27),
             RangeSensorPins("right", trig=6, echo=22),
         )
@@ -126,15 +129,34 @@ class FaceConfig:
     # que quepa en la pantalla: así los píxeles salen cuadrados y nítidos en
     # lugar de emborronados por un escalado fraccionario.
     logical_width: int = 160
-    logical_height: int = 106
+    # 120 en vez de 106: la pantalla de 3.2" es 320x240 (4:3), y con este alto
+    # el factor ×2 llena el panel exacto, sin franjas negras arriba/abajo.
+    logical_height: int = 120
     fps: int = 30
-    # La 3.5" HDMI es 480x320; en desarrollo se abre una ventana escalada.
-    window_scale: int = 3
+    # La 3.2" SPI es 320x240; en desarrollo se abre una ventana escalada.
+    window_scale: int = 2
     # Cada cuánto parpadea, con algo de azar para que no parezca un metrónomo.
     blink_every_s: float = 4.0
     blink_jitter_s: float = 2.5
     # Sin actividad durante este tiempo, la cara se adormece.
     sleepy_after_s: float = 90.0
+
+    # --- Pantalla física (SPI, no HDMI/DRM) ---
+    # El overlay de estos clones de 3.2" suele exponer un framebuffer clásico
+    # en vez de un dispositivo DRM/KMS, así que `_init_display` no puede usar
+    # kmsdrm a secas. Configurable porque el driver real depende del overlay
+    # que termine instalado (ver README C10) — pendiente de confirmar con la
+    # pantalla en mano.
+    sdl_video_driver: str = "fbcon"
+    fb_device: str = "/dev/fb1"
+
+    # --- Gestos táctiles ---
+    # No requieren calibración de coordenadas: solo miden cuánto duró el
+    # toque, no dónde ocurrió.
+    touch_tap_max_s: float = 0.6
+    touch_hold_s: float = 3.0
+    # Orden de ciclo del toque corto, publicado en CMD_MODE.
+    touch_mode_cycle: tuple[str, ...] = ("idle", "patrol", "follow_cat")
 
 
 @dataclass(frozen=True)

@@ -140,10 +140,11 @@ def draw(surface: pygame.Surface, expr: Expression,
 def present(screen: pygame.Surface, canvas: pygame.Surface) -> None:
     """Escala el lienzo a la pantalla y lo centra.
 
-    El factor de escala es entero a propósito. Con 480×320 de pantalla y un
-    lienzo de 160×106 sale ×3 (480×318), y los 2 píxeles sobrantes quedan como
-    borde negro, invisible sobre un fondo oscuro. Estirar hasta llenar daría
-    píxeles rectangulares y bordes borrosos.
+    El factor de escala es entero a propósito. Con 320×240 de pantalla y un
+    lienzo de 160×120 sale ×2 exacto, sin bordes. Si el lienzo no encajara
+    limpio, los píxeles sobrantes quedarían como borde negro, invisible sobre
+    un fondo oscuro. Estirar hasta llenar daría píxeles rectangulares y
+    bordes borrosos.
     """
     sw, sh = screen.get_size()
     cw, ch = canvas.get_size()

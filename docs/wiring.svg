@@ -50,17 +50,17 @@
 <text x="674" y="319" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; BIN1</text>
 <text x="386" y="336" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO26 (p37)</text>
 <text x="674" y="336" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; BIN2</text>
-<text x="386" y="353" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO25 (p22)</text>
+<text x="386" y="353" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO19 (p35)</text>
 <text x="674" y="353" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; STBY</text>
 <path d="M386,362 L674,362" fill="none" stroke="#2c3648" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="386" y="380" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO18 (p12)</text>
+<text x="386" y="380" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO14 (p8)</text>
 <text x="674" y="380" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; servo izq</text>
 <text x="386" y="397" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO23 (p16)</text>
 <text x="674" y="397" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; servo der</text>
 <path d="M386,406 L674,406" fill="none" stroke="#2c3648" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="386" y="424" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO4 (p7)</text>
 <text x="674" y="424" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; TRIG front</text>
-<text x="386" y="441" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO17 (p11)</text>
+<text x="386" y="441" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO15 (p10)</text>
 <text x="674" y="441" fill="#ff5c5c" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- ECHO front (!)</text>
 <text x="386" y="458" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO5 (p29)</text>
 <text x="674" y="458" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; TRIG left</text>
@@ -71,12 +71,12 @@
 <text x="386" y="509" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO22 (p15)</text>
 <text x="674" y="509" fill="#ff5c5c" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- ECHO right (!)</text>
 <path d="M386,518 L674,518" fill="none" stroke="#2c3648" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="386" y="536" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GPIO24 (p18)</text>
+<text x="386" y="536" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">Expansor I2C</text>
 <text x="674" y="536" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; LEDs IR (transistor)</text>
 <text x="386" y="553" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">CSI</text>
 <text x="674" y="553" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; cámara OV5647</text>
-<text x="386" y="570" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">micro-HDMI</text>
-<text x="674" y="570" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; pantalla 3.5"</text>
+<text x="386" y="570" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">header 40p</text>
+<text x="674" y="570" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; pantalla SPI 3.2" táctil</text>
 <text x="386" y="587" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">jack 3.5 mm</text>
 <text x="674" y="587" fill="#8b97a8" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">-&gt; audio</text>
 <path d="M308,336 L340,336 L340,200 L372,200" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -93,7 +93,7 @@
 <text x="770" y="224" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">GND</text>
 <text x="1106" y="224" fill="#7c8797" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- masa común</text>
 <text x="770" y="241" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">STBY</text>
-<text x="1106" y="241" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- GPIO25 (p22)</text>
+<text x="1106" y="241" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- GPIO19 (p35)</text>
 <text x="770" y="258" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">PWMA / AIN1 / AIN2</text>
 <text x="1106" y="258" fill="#5ac8fa" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">&lt;- Pi</text>
 <text x="770" y="275" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">PWMB / BIN1 / BIN2</text>
@@ -115,7 +115,7 @@
 <text x="770" y="614" fill="#8b97a8" font-size="11.5" font-family="ui-sans-serif,system-ui,sans-serif">frontal + diagonales a 35° · VCC a 5 V</text>
 <text x="770" y="638" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">front</text>
 <text x="834" y="638" fill="#5ac8fa" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">TRIG GPIO4 (p7)</text>
-<text x="1106" y="638" fill="#ff5c5c" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">ECHO GPIO17 (p11)</text>
+<text x="1106" y="638" fill="#ff5c5c" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">ECHO GPIO15 (p10)</text>
 <text x="770" y="656" fill="#e8ecf2" font-size="11.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">left</text>
 <text x="834" y="656" fill="#5ac8fa" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="start">TRIG GPIO5 (p29)</text>
 <text x="1106" y="656" fill="#ff5c5c" font-size="10.5" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="end">ECHO GPIO27 (p13)</text>

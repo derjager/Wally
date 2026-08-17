@@ -223,6 +223,7 @@ Comprueba estas cuatro cosas:
 | **Advanced Options → Expand Filesystem** | Que use toda la tarjeta. Suele hacerse solo, pero conviene verificar |
 | **Advanced Options → Network Config** | Debe estar en **NetworkManager**. `wally-net` lo necesita para el hotspot |
 | **System Options → Audio** | Elige **Headphones** (el jack de 3.5 mm) |
+| **Interface Options → SPI** | Actívalo — lo necesita la pantalla táctil (C10) |
 | **Interface Options → I2C** | Actívalo si vas a poner un ADS1115 para medir la batería |
 
 En Bookworm la cámara se detecta sola, así que **no** hay que activar nada de
@@ -342,42 +343,50 @@ bash deploy/install_model.sh
 Descarga EfficientDet-Lite0 (COCO, incluye la clase `cat`) e instala
 `tflite-runtime`.
 
-### C10. Configurar la pantalla de 3.5"
+### C10. Configurar la pantalla táctil de 3.2"
 
 > Este es el paso con más fricción de toda la instalación. Presupuesta una
-> sesión entera si la pantalla no arranca a la primera.
+> sesión entera si la pantalla no arranca a la primera — la razón cambió
+> respecto a versiones anteriores de esta guía (antes eran los timings HDMI;
+> ahora es encontrar el overlay/driver correcto para el panel SPI), pero la
+> fricción sigue ahí.
 
-Conecta la pantalla por **micro-HDMI** (hace falta adaptador; la Pi 4 no trae
-HDMI de tamaño completo) y edita:
+La pantalla se monta **directo sobre el header de 40 pines** — no hay cable
+de vídeo que conectar. Con la Pi apagada, encájala con cuidado de alinear el
+pin 1 (revisa la serigrafía de ambas placas antes de hacer fuerza).
+
+**Habilita SPI:**
 
 ```bash
-sudo nano /boot/firmware/cmdline.txt
+sudo raspi-config nonint do_spi 0
 ```
 
-Añade al final de la **única línea** que hay, separado por un espacio:
+(o `Interface Options → SPI` desde el menú, ver C4). Reinicia.
 
-```
-video=HDMI-A-1:480x320M@60
-```
+**Instala el overlay/driver del panel.** El pinout y el nombre exacto del
+overlay dependen del fabricante — PLAN.md §3 documenta el pinout típico de
+esta familia (ILI9341 + táctil XPT2046 por SPI0) como estimación de partida,
+pero **hay que confirmarlo con la ficha o la web del vendedor**. Muchos
+clones de esta gama todavía dependen de un script/overlay propio (tipo
+`LCD-show`) en vez de uno incluido en Raspberry Pi OS. Tras instalarlo,
+confirma que aparece el framebuffer del panel:
 
-Reinicia y comprueba que la consola sale en la pantalla. Si sigue en negro,
-prueba la vía antigua en `/boot/firmware/config.txt`:
-
-```ini
-hdmi_force_hotplug=1
-hdmi_group=2
-hdmi_mode=87
-hdmi_cvt=480 320 60 6 0 0 0
-hdmi_drive=2
+```bash
+ls /dev/fb*        # debería aparecer /dev/fb1 además de /dev/fb0
 ```
 
-Esos ajustes `hdmi_*` sólo funcionan con el driver de firmware, así que en ese
-caso hay que cambiar también el overlay a `dtoverlay=vc4-fkms-v3d`. Los
-tutoriales antiguos usan esta segunda vía porque son anteriores a Bookworm.
+Si el nombre del device o el driver SDL terminan siendo distintos a
+`/dev/fb1`/`fbcon`, ajusta `fb_device`/`sdl_video_driver` en
+`config/wally.toml` — no hace falta tocar código, son campos de config
+(`common/config.py`, `FaceConfig`).
 
-**El táctil no se conecta.** Estas pantallas suelen usar táctil resistivo por
-SPI, que consumiría 7 pines GPIO —incluidos dos ya asignados— y no aporta
-nada: la cara es sólo salida visual y todo el control va por la webapp.
+**El táctil sí se conecta** — a diferencia de la pantalla HDMI anterior, aquí
+no hay forma de evitarlo (el conector es el mismo header). `wally-face` ya
+reconoce dos gestos sin necesidad de calibrar coordenadas (PLAN.md §8):
+toque corto para ciclar de modo, toque largo (3 s) para forzar el hotspot de
+red. Si el táctil no responde, revisa que el overlay instalado incluya
+también el controlador táctil (no solo el de vídeo) — son chips separados
+aunque compartan el mismo bus SPI.
 
 Si al arrancar la cara ves el cursor de la consola parpadeando por detrás:
 
@@ -539,8 +548,8 @@ parecería apagado casi siempre.
 
 Las expresiones son **geometría interpolable**, no sprites en disco: eso permite
 transiciones suaves entre estados sin dibujar los fotogramas intermedios a mano,
-y deja el repositorio sin binarios. El pixel art sale de dibujar en 160×106 y
-escalar por un factor **entero** (×3 en la pantalla de 480×320), con las
+y deja el repositorio sin binarios. El pixel art sale de dibujar en 160×120 y
+escalar por un factor **entero** (×2 en la pantalla de 320×240), con las
 esquinas achaflanadas a mano y sin antialiasing en ninguna primitiva.
 
 ### Voz

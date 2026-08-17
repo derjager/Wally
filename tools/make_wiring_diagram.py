@@ -193,9 +193,9 @@ def build() -> str:
         rows.append((pin(sensor.trig), f"-> TRIG {sensor.name}", SIGNAL))
         rows.append((pin(sensor.echo), f"<- ECHO {sensor.name} (!)", WARN))
     rows.append((None, None, None))
-    rows.append(("GPIO24 (p18)", "-> LEDs IR (transistor)", MUTED))
+    rows.append(("Expansor I2C", "-> LEDs IR (transistor)", MUTED))
     rows.append(("CSI", "-> cámara OV5647", MUTED))
-    rows.append(("micro-HDMI", "-> pantalla 3.5\"", MUTED))
+    rows.append(("header 40p", "-> pantalla SPI 3.2\" táctil", MUTED))
     rows.append(("jack 3.5 mm", "-> audio", MUTED))
 
     y = content_y
